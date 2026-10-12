@@ -22,11 +22,10 @@ spec:
           annotations:
             description: "The Cilium agent {{ $labels.pod }} has {{ $value }} failing controller(s). Check the logs of the agent."
             summary: "Cilium Agent has Failing Controllers."
-          # TEMP: fires on purpose, revert before merging.
           expr: |
             sum(
               cilium_controllers_failing
-            ) by (pod) >= 0
+            ) by (pod) > 0
           for: 5m
           labels:
             severity: warning
