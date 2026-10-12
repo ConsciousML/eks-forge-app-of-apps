@@ -287,7 +287,7 @@ The [blackbox exporter](https://github.com/prometheus/blackbox_exporter) calls e
 </Tabs>
 
 {/* TODO: document testing a new hostname in staging. The live repository's staging tests
-(tests/staging_stack_test.go) poll each entry of endpointChecks, reading its host from a
+(tests/endpoint_checks_test.go) poll each entry of endpointChecks, reading its host from a
 domain_name_<app> unit output. To cover a new app: copy a units/eks/domain_name/<app> unit in
 the catalog, add its block to the dev stack, and add an endpointChecks entry in live. */}
 
