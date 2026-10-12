@@ -8,24 +8,38 @@ To ship a merged change to `staging` and `prod`, see [Release a Change to Produc
 
 ## Point Dev at Your Branch
 
+### Create a Branch
+
 From the root of your app of apps fork, create a branch and push it, replacing `<branch>`:
 ```bash
 git checkout -b <branch>
 git push -u origin <branch>
 ```
 
-If your change needs one of the [Extra Steps](#extra-steps) other than a different config per environment or metrics in Prometheus, or removes an app that receives Terraform values, it also touches your catalog fork. Create a branch from the root of your catalog fork too:
+### Create a Catalog Branch
+
+Your change also touches your catalog fork if it removes an app that receives Terraform values, or needs one of these [Extra Steps](#extra-steps):
+- A value from Terraform
+- A secret
+- A hostname
+- An AWS resource
+
+Otherwise, skip this section.
+
+Create a branch from the root of your catalog fork too, replacing `<branch>`:
 ```bash
 git checkout -b <branch>
 git push -u origin <branch>
 ```
 
-Then, at the root of your catalog fork, write your branch name to `.app-of-apps-branch`, so ArgoCD syncs `dev` from it instead of `main`:
+### Sync Dev from Your Branch
+
+At the root of your catalog fork, write your branch name to `.app-of-apps-branch` by replacing `<branch>`, so ArgoCD syncs `dev` from it instead of `main`:
 ```bash
 echo <branch> > .app-of-apps-branch
 ```
 
-The catalog reads `.app-of-apps-branch` when it generates the stack, so your branch only takes effect once the root Application is applied again. If `dev` isn't deployed yet, deploy it as in [Deploy the Dev Stack](/docs/applications/get-started/deployment/#deploy-the-dev-stack). If it's already running, re-apply only the `argocd_app_of_apps` unit from the root of your catalog fork:
+The catalog reads `.app-of-apps-branch` when it generates the stack, so your app of apps branch is only applied once you apply the [root Application](/docs/applications/how-the-app-of-apps-works/#the-root-app-and-its-children) again. If `dev` isn't deployed yet, deploy it as in [Deploy the Dev Stack](/docs/applications/get-started/deployment/#deploy-the-dev-stack). If it's already running, re-apply only the `argocd_app_of_apps` unit from the root of your catalog fork:
 ```bash
 source .env
 cd pipelines/dev/eks/stack
