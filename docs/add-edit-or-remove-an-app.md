@@ -20,12 +20,12 @@ git checkout -b <branch>
 git push -u origin <branch>
 ```
 
-Then, in the `.env` of your catalog fork, set [`APP_OF_APPS_BRANCH`](/docs/reference/environment_variable/#app_of_apps_branch) to your branch, so ArgoCD syncs `dev` from it instead of `main`:
+Then, at the root of your catalog fork, write your branch name to `.app-of-apps-branch`, so ArgoCD syncs `dev` from it instead of `main`:
 ```bash
-export APP_OF_APPS_BRANCH=<branch>
+echo <branch> > .app-of-apps-branch
 ```
 
-The catalog reads `APP_OF_APPS_BRANCH` only when it applies the root Application. If `dev` isn't deployed yet, deploy it as in [Deploy the Dev Stack](/docs/applications/get-started/deployment/#deploy-the-dev-stack). If it's already running, re-apply only the `argocd_app_of_apps` unit from the root of your catalog fork:
+The catalog reads `.app-of-apps-branch` when it generates the stack, so your branch only takes effect once the root Application is applied again. If `dev` isn't deployed yet, deploy it as in [Deploy the Dev Stack](/docs/applications/get-started/deployment/#deploy-the-dev-stack). If it's already running, re-apply only the `argocd_app_of_apps` unit from the root of your catalog fork:
 ```bash
 source .env
 cd pipelines/dev/eks/stack
@@ -196,6 +196,6 @@ If you also opened a pull request in your catalog fork, merge it the same way fr
 - **You added an `appParams` key**: merge the app of apps pull request first, then the catalog one.
 - **You removed an `appParams` key**: merge the catalog pull request first, then the app of apps one.
 
-Finally, remove the `APP_OF_APPS_BRANCH` line from the `.env` of your catalog fork, so your next `dev` deployment syncs from `main` again.
+Finally, delete `.app-of-apps-branch` from the root of your catalog fork, so your next `dev` deployment syncs from `main` again.
 
 To ship your change to `staging` and `prod`, see [Release a Change to Production](/docs/deployment/release-a-change-to-production/).
