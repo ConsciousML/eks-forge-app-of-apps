@@ -230,11 +230,14 @@ applications:
   # ServiceMonitor/PrometheusRule CRDs are Terraform-managed, applied before ArgoCD ever syncs.
   # Depends on:
   # - network-policies-cluster-wide
+  # - grafana-httproute, prometheus-httproute, alertmanager-httproute, argocd-httproute,
+  #   hubble-ui-httproute, podinfo-httproute (the probed endpoints, EndpointDown fires on
+  #   cluster creation if probing starts before they exist)
   - name: blackbox-exporter
     path: charts/monitoring/blackbox-exporter
     destination:
       namespace: monitoring
-    syncWave: 4
+    syncWave: 8
 
   # --- Prometheus Rules ---
   - name: prometheus-rules
