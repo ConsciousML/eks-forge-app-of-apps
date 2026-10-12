@@ -10,9 +10,9 @@ git checkout -b podinfo-message
 git push -u origin podinfo-message
 ```
 
-Then, in the `.env` of your catalog fork, set [`APP_OF_APPS_BRANCH`](/docs/reference/environment_variable/#app_of_apps_branch) to your branch so ArgoCD syncs from it instead of `main`:
+Then, at the root of your catalog fork, write your branch name to `.app-of-apps-branch` so ArgoCD syncs from it instead of `main`:
 ```bash
-export APP_OF_APPS_BRANCH=podinfo-message
+echo podinfo-message > .app-of-apps-branch
 ```
 
 ## Deploy the Dev Stack
@@ -96,7 +96,7 @@ Git is the source of truth. To change an application, commit to your app of apps
 ## Destroy the Infrastructure
 Destroy the `dev` environment by following the [Destroy the Infrastructure](/docs/quickstart/deployment/#destroy-the-infrastructure) step of the dev deployment.
 
-Finally, remove the `APP_OF_APPS_BRANCH` line from the `.env` of your catalog fork, so your next `dev` deployment syncs from `main` again.
+Finally, delete `.app-of-apps-branch` from the root of your catalog fork, so your next `dev` deployment syncs from `main` again.
 
 ## What's Next
 Next, see [Add an App](/docs/applications/add-edit-or-remove-an-app/) to add your own app to your fork, then test it in `dev` the same way.
