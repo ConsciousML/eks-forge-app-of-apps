@@ -1,0 +1,203 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cilium
+spec:
+  groups:
+    - name: cilium
+      rules:
+        - alert: CiliumAgentUnreachableNodes
+          annotations:
+            description: "The Cilium agent {{ $labels.pod }} cannot reach {{ $value }} node(s) with its health probes. Check the connectivity between nodes and the health of each node."
+            summary: "Cilium Agent has Unreachable Nodes."
+          expr: |
+            sum(
+              cilium_unreachable_nodes
+            ) by (pod) > 0
+          for: 15m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumAgentFailingControllers
+          annotations:
+            description: "The Cilium agent {{ $labels.pod }} has {{ $value }} failing controller(s). Check the logs of the agent."
+            summary: "Cilium Agent has Failing Controllers."
+          expr: |
+            sum(
+              cilium_controllers_failing
+            ) by (pod) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumAgentPolicyImportErrors
+          annotations:
+            description: "The Cilium agent {{ $labels.pod }} is failing to import network policies. Policy enforcement may be incomplete."
+            summary: "Cilium Agent has Policy Import Errors."
+          expr: |
+            sum(
+              rate(
+                cilium_policy_change_total{
+                  outcome="fail"
+                }[5m]
+              )
+            ) by (pod) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumAgentEndpointRegenerationFailures
+          annotations:
+            description: "The Cilium agent {{ $labels.pod }} is failing to regenerate endpoints. The network policies of its pods may be stale."
+            summary: "Cilium Agent has Endpoint Regeneration Failures."
+          expr: |
+            sum(
+              rate(
+                cilium_endpoint_regenerations_total{
+                  outcome="fail"
+                }[5m]
+              )
+            ) by (pod) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumAgentPolicyImplementationDelay
+          annotations:
+            description: "The Cilium agent {{ $labels.pod }} takes more than 60 seconds at the 99th percentile to apply a policy change. Endpoints may run with stale policies."
+            summary: "Cilium Agent Policy Implementation Delay is High."
+          expr: |
+            histogram_quantile(
+              0.99,
+              sum(
+                rate(
+                  cilium_policy_implementation_delay_bucket[5m]
+                )
+              ) by (le, pod)
+            ) > 60
+          for: 5m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumAgentConntrackTableFull
+          annotations:
+            description: "The connection tracking table of the Cilium agent {{ $labels.pod }} is full and packets are dropped. Increase the size of the table or look for a connection leak."
+            summary: "Cilium Agent Conntrack Table is Full."
+          expr: |
+            sum(
+              rate(
+                cilium_drop_count_total{
+                  reason="CT: Map insertion failed"
+                }[5m]
+              )
+            ) by (pod) > 0
+          for: 5m
+          labels:
+            severity: critical
+            component: k8s
+        - alert: CiliumAgentConntrackFailedGarbageCollection
+          annotations:
+            description: "The connection tracking garbage collection of the Cilium agent {{ $labels.pod }} does not complete. Stale entries may fill the table."
+            summary: "Cilium Agent Conntrack Garbage Collection is Failing."
+          expr: |
+            sum(
+              rate(
+                cilium_datapath_conntrack_gc_runs_total{
+                  status="uncompleted"
+                }[5m]
+              )
+            ) by (pod) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumAgentBpfMapPressure
+          annotations:
+            description: "The eBPF map {{ $labels.map_name }} of the Cilium agent {{ $labels.pod }} is more than 90% full. New entries are dropped once it is full."
+            summary: "Cilium Agent eBPF Map is Almost Full."
+          expr: |
+            max(
+              cilium_bpf_map_pressure
+            ) by (pod, map_name) > 0.9
+          for: 5m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumAgentMapOperationFailures
+          annotations:
+            description: "The Cilium agent {{ $labels.pod }} has failing operations on the eBPF map {{ $labels.map_name }}. The datapath may be degraded."
+            summary: "Cilium Agent has eBPF Map Operation Failures."
+          expr: |
+            sum(
+              rate(
+                cilium_bpf_map_ops_total{
+                  outcome="fail"
+                }[5m]
+              )
+            ) by (pod, map_name) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumAgentApiErrors
+          annotations:
+            description: "The API of the Cilium agent {{ $labels.pod }} returns {{ $labels.return_code }} errors. The agent may be unhealthy."
+            summary: "Cilium Agent API has Errors."
+          expr: |
+            sum(
+              rate(
+                cilium_agent_api_process_time_seconds_count{
+                  return_code=~"5[0-9][0-9]"
+                }[5m]
+              )
+            ) by (pod, return_code) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumAgentHighDropRate
+          annotations:
+            description: "The Cilium agent {{ $labels.pod }} is dropping packets for the reason {{ $labels.reason }}."
+            summary: "Cilium Agent Drop Rate is High."
+          # Policy denials are expected. Unsupported L3 protocol is steady non-IP traffic.
+          expr: |
+            sum(
+              rate(
+                cilium_drop_count_total{
+                  reason!~"Policy denied|Unsupported L3 protocol"
+                }[5m]
+              )
+            ) by (pod, reason) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumHubbleLostEvents
+          annotations:
+            description: "Hubble on the Cilium agent {{ $labels.pod }} is losing flow events from {{ $labels.source }}. Network flows may be missing."
+            summary: "Hubble is Losing Events."
+          # hubble_ring_buffer is excluded. It counts flows a slow reader missed, not lost ones.
+          expr: |
+            sum(
+              rate(
+                hubble_lost_events_total{
+                  source=~"perf_event_ring_buffer|observer_events_queue"
+                }[5m]
+              )
+            ) by (pod, source) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: k8s
+        - alert: CiliumOperatorUnmanagedPods
+          annotations:
+            description: "{{ $value }} pod(s) have no CiliumEndpoint. Every network policy treats them as world. Restart them with scripts/restart-missing-cilium-endpoints.sh in the catalog repository."
+            summary: "Cilium has Unmanaged Pods."
+          expr: |
+            max(
+              cilium_operator_unmanaged_pods
+            ) > 0
+          for: 15m
+          labels:
+            severity: warning
+            component: k8s
