@@ -43,7 +43,7 @@ spec:
               protocol: TCP
   egress:
     # serviceMonitorSelectorNilUsesHelmValues/podMonitorSelectorNilUsesHelmValues are false (see
-    # docs/monitoring.md), so Prometheus scrapes any ServiceMonitor/PodMonitor in the cluster,
+    # `values.yaml`), so Prometheus scrapes any ServiceMonitor/PodMonitor in the cluster,
     # on any port, in any namespace. Enumerating every target here doesn't scale (every new
     # addon's ServiceMonitor needed a new entry), so this allows all in-cluster destinations
     # instead. Still blocks egress to `world`, so no exfiltration path out of the cluster.
