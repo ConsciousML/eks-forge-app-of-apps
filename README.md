@@ -1,3 +1,5 @@
+![EKS Forge](https://raw.githubusercontent.com/ConsciousML/eks-forge/main/site/static/img/readme-banner.png)
+
 # EKS Forge App of Apps
 
 [EKS Forge](https://eks-forge.readthedocs.io/latest/) is an open-source platform for building and operating [EKS](https://aws.amazon.com/eks/) clusters.
