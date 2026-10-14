@@ -23,7 +23,7 @@ flowchart LR
 ```
 
 ## Why k6 Runs Inside the Cluster
-k6 runs as a pod, and calls the app's [`Service`](https://kubernetes.io/docs/concepts/services-networking/service/) by its cluster DNS name, like `podinfo.podinfo.svc.cluster.local`. The app needs no hostname, a private app needs no [Tailscale](/docs/security/tailscale/) connection, and the load doesn't depend on your machine or its network.
+k6 runs as a pod, and calls the app's [`Service`](https://kubernetes.io/docs/concepts/services-networking/service/) by its cluster DNS name, like `podinfo.podinfo.svc.cluster.local`. The app needs no hostname, a private app needs no [Tailscale](/docs/networking/tailscale/) connection, and the load doesn't depend on your machine or its network.
 
 The k6 pod runs on the [`elastic` NodePool](/docs/compute/how-pods-are-scheduled/#elastic-nodepool), like podinfo. Karpenter launches a node for it if none has room, and removes it after the run.
 

@@ -4,7 +4,7 @@
 
 The [`external-dns` chart](./) deploys [ExternalDNS](https://kubernetes-sigs.github.io/external-dns/) via the upstream `external-dns` chart, reused for both the private and public hosted zones. Each `external-dns-*-values.yaml` file in this directory is one instance, loaded via `extraValueFiles` in [`apps/values.yaml`](../../apps/values.yaml). [Values](#values) lists only what this chart sets. For every other key, read the upstream [`values.yaml`](https://github.com/kubernetes-sigs/external-dns/blob/master/charts/external-dns/values.yaml).
 
-For setup steps, read [How to Expose an App](/docs/applications/expose-an-app/).
+For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 
 ## What's Inside
 

@@ -103,7 +103,7 @@ Deploy your change to `dev` by following [Test in Dev](/docs/applications/add-ed
 
 ## Check the Target
 
-Prometheus is only reachable over [Tailscale](/docs/security/tailscale/). Connect by running `tailscale up`, then open `https://prometheus.private.dev.<base_domain>` in your browser, replacing `<base_domain>` with your base domain. Run this query, replacing `<namespace>` with your app's namespace:
+Prometheus is only reachable over [Tailscale](/docs/networking/tailscale/). Connect by running `tailscale up`, then open `https://prometheus.private.dev.<base_domain>` in your browser, replacing `<base_domain>` with your base domain. Run this query, replacing `<namespace>` with your app's namespace:
 ```promql
 up{namespace="<namespace>"}
 ```

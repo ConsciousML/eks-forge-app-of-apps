@@ -15,7 +15,7 @@ If you've never opened Alertmanager, follow [Follow an Alert](/docs/monitoring/g
 
 ## Silence the Alert
 
-Alertmanager is only reachable over [Tailscale](/docs/security/tailscale/). Connect by running `tailscale up`, then open `https://alertmanager.private.<environment>.<base_domain>` in your browser, replacing `<environment>` with your [environment](/docs/iac/#environments) (e.g. `dev`) and `<base_domain>` with your base domain. Each environment has its own Alertmanager, so a silence only applies to the one you open.
+Alertmanager is only reachable over [Tailscale](/docs/networking/tailscale/). Connect by running `tailscale up`, then open `https://alertmanager.private.<environment>.<base_domain>` in your browser, replacing `<environment>` with your [environment](/docs/iac/#environments) (e.g. `dev`) and `<base_domain>` with your base domain. Each environment has its own Alertmanager, so a silence only applies to the one you open.
 
 Find your alert in the list, and click its **Silence** button. A form opens, with one matcher per label of the alert.
 

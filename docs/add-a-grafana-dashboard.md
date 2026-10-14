@@ -116,7 +116,7 @@ Deploy your change to `dev` by following [Test in Dev](/docs/applications/add-ed
 
 ## Check the Dashboard
 
-Grafana is only reachable over [Tailscale](/docs/security/tailscale/). Connect by running `tailscale up`, then open `https://grafana.private.dev.<base_domain>` in your browser, replacing `<base_domain>` with your base domain, and log in as in [Log In to Grafana](/docs/monitoring/get-started/metrics/#log-in-to-grafana).
+Grafana is only reachable over [Tailscale](/docs/networking/tailscale/). Connect by running `tailscale up`, then open `https://grafana.private.dev.<base_domain>` in your browser, replacing `<base_domain>` with your base domain, and log in as in [Log In to Grafana](/docs/monitoring/get-started/metrics/#log-in-to-grafana).
 
 In the left menu, click **Dashboards**, and open your folder. Your dashboard should be listed. Open it, and check that its panels show data. If something is off, see [Troubleshooting](#troubleshooting).
 

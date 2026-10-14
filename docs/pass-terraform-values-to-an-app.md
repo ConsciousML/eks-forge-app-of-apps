@@ -7,7 +7,7 @@ import TabItem from '@theme/TabItem';
 
 This guide shows you how to pass a value from the catalog to an app, through [`appParams`](/docs/applications/how-the-app-of-apps-works/#appparams-injection). You need it when your app reads a value that comes from an AWS resource or the catalog's configuration (e.g. an S3 bucket name, a certificate ARN, or the region). It's one of the [Extra Steps](/docs/applications/add-edit-or-remove-an-app/#extra-steps) of adding or editing an app, and assumes you've created a branch in both forks, as in [Point Dev at Your Branch](/docs/applications/add-edit-or-remove-an-app/#point-dev-at-your-branch).
 
-For a value that only differs per environment, see [Configure an App per Environment](/docs/applications/configure-an-app-per-environment/) instead. For a hostname, see [Expose an App](/docs/applications/expose-an-app/). For a secret, see [Pass a Secret to an App](/docs/applications/pass-a-secret-to-an-app/).
+For a value that only differs per environment, see [Configure an App per Environment](/docs/applications/configure-an-app-per-environment/) instead. For a hostname, see [Expose an App](/docs/networking/expose-an-app/). For a secret, see [Pass a Secret to an App](/docs/applications/pass-a-secret-to-an-app/).
 
 ## In Your App of Apps Fork
 

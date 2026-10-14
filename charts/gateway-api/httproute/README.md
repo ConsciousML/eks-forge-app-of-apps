@@ -4,7 +4,7 @@
 
 The [`httproute` chart](./) renders a generic `HTTPRoute` bound to a shared `Gateway`, reused by every app that needs a hostname. Each `*-httproute-values.yaml` file in this directory is one instance, loaded via `extraValueFiles` in [`apps/values.yaml`](../../../apps/values.yaml).
 
-For setup steps, read [How to Expose an App](/docs/applications/expose-an-app/).
+For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 
 ## What's Inside
 
