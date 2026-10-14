@@ -4,7 +4,7 @@
 
 The [`gateway` chart](./) renders a Gateway API `Gateway` backed by an ALB, in two instances: `gateway-public` (internet-facing) and `gateway-private` (internal). Each `*-gateway-values.yaml` file in this directory is one instance, loaded via `extraValueFiles` in [`apps/values.yaml`](../../../apps/values.yaml).
 
-For setup steps, read [How to Expose an App](/docs/applications/expose-an-app/).
+For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 
 ## What's Inside
 

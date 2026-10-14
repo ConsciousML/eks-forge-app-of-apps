@@ -4,7 +4,7 @@
 
 The [`gateway-class` chart](./) renders a `GatewayClass` implemented by the AWS Load Balancer Controller.
 
-For setup steps, read [How to Expose an App](/docs/applications/expose-an-app/).
+For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 
 ## What's Inside
 

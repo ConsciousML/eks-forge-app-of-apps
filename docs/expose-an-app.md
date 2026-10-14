@@ -9,7 +9,9 @@ This guide shows you how to route an app through the public or private [gateway]
 
 Pick the gateway that fits your app. Each one is an [Application Load Balancer](https://aws.amazon.com/elasticloadbalancing/application-load-balancer/) (ALB), and the tabs below follow this choice:
 - **Public**: reachable from the internet, at `<subdomain>.public.<env>.<base_domain>` (e.g. podinfo, at `podinfo.public.dev.example.com`).
-- **Private**: reachable only from inside the VPC or over [Tailscale](/docs/security/tailscale/), at `<subdomain>.private.<env>.<base_domain>` (e.g. Goldilocks, at `goldilocks.private.dev.example.com`).
+- **Private**: reachable only from inside the VPC or over [Tailscale](/docs/networking/tailscale/), at `<subdomain>.private.<env>.<base_domain>` (e.g. Goldilocks, at `goldilocks.private.dev.example.com`).
+
+For why there are two gateways, and how a request reaches your app, see [How Ingress Works](/docs/networking/how-ingress-works/).
 
 ## In Your App of Apps Fork
 
@@ -291,7 +293,7 @@ The [blackbox exporter](https://github.com/prometheus/blackbox_exporter) calls e
 domain_name_<app> unit output. To cover a new app: copy a units/eks/domain_name/<app> unit in
 the catalog, add its block to the dev stack, and add an endpointChecks entry in live. */}
 
-Then follow [Test in Dev](/docs/applications/add-edit-or-remove-an-app/#test-in-dev). After you sync, also check that your hostname answers, replacing `<host>`. For a private hostname, connect to [Tailscale](/docs/security/tailscale/) first, by running `tailscale up`:
+Then follow [Test in Dev](/docs/applications/add-edit-or-remove-an-app/#test-in-dev). After you sync, also check that your hostname answers, replacing `<host>`. For a private hostname, connect to [Tailscale](/docs/networking/tailscale/) first, by running `tailscale up`:
 ```bash
 curl -I https://<host>
 ```

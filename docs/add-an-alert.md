@@ -119,7 +119,7 @@ Deploy your change to `dev` by following [Test in Dev](/docs/applications/add-ed
 
 ## Check the Rule
 
-Prometheus is only reachable over [Tailscale](/docs/security/tailscale/). Connect by running `tailscale up`, then open `https://prometheus.private.dev.<base_domain>` in your browser, replacing `<base_domain>` with your base domain. In the top menu, click **Alerts**, and type the name of your alert in the search bar.
+Prometheus is only reachable over [Tailscale](/docs/networking/tailscale/). Connect by running `tailscale up`, then open `https://prometheus.private.dev.<base_domain>` in your browser, replacing `<base_domain>` with your base domain. In the top menu, click **Alerts**, and type the name of your alert in the search bar.
 
 Click your alert to expand it, and check that it shows your `component` and `severity` labels. A new rule can take a minute to show up.
 
