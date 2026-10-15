@@ -6,7 +6,7 @@ In this tutorial, you'll fork the [ArgoCD app of apps repository](https://github
 ## Fork the App of Apps Repository
 The app of apps repository holds the [Helm charts](https://helm.sh/docs/topics/charts/) and manifests that [ArgoCD](https://argo-cd.readthedocs.io/en/stable/) syncs into your cluster. Like the catalog and live repositories, it's meant to be forked and extended.
 
-First, create an empty repository from [GitHub's new repository page](https://github.com/new). Make it public, since ArgoCD reads it without credentials. Leave the README, `.gitignore`, and license options unset.
+First, create an empty repository from [GitHub's new repository page](https://github.com/new). Make it private or public. If it's private, also set `app_of_apps_private = true` in [Point the Catalog at Your Fork](#point-the-catalog-at-your-fork). Leave the README, `.gitignore`, and license options unset.
 
 Then, set your GitHub owner (user or organization) and the name of the repository you created, by replacing the `<...>`:
 ```bash
@@ -63,11 +63,12 @@ Trivy secret scan........................................................Passed
 From now on, the hooks run on the files you change each time you `git commit`.
 
 ## Point the Catalog at Your Fork
-From the root of your [catalog fork](/docs/quickstart/installation/#fork-the-eks-forge-catalog), set these two values in [`pipelines/github.hcl`](https://github.com/ConsciousML/eks-forge-catalog/blob/main/pipelines/github.hcl) and leave the others as is:
+From the root of your [catalog fork](/docs/quickstart/installation/#fork-the-eks-forge-catalog), set these values in [`pipelines/github.hcl`](https://github.com/ConsciousML/eks-forge-catalog/blob/main/pipelines/github.hcl) and leave the others as is:
 ```hcl
 locals {
   github_owner_app_of_apps     = "<your-github-username-or-org-name-where-your-app-of-apps-fork-is>"
   github_repo_name_app_of_apps = "<your-app-of-apps-repo-name>"
+  app_of_apps_private          = <true-if-your-fork-is-private>
   ...
 }
 ```
@@ -99,6 +100,6 @@ Finally, list the deploy keys of your app of apps fork:
 gh repo deploy-key list -R $GITHUB_OWNER/$APP_OF_APPS_REPO_NAME
 ```
 
-You should see `Helm Docs Deploy Key` with `read-write` permission.
+You should see `Helm Docs Deploy Key` with `read-write` permission, and `ArgoCD Deploy Key` with `read-only` permission. When `app_of_apps_private` is `true`, ArgoCD reads your fork with the second one.
 
 For more information about this bootstrap, read the [App of Apps Deploy Key](/docs/reference/bootstrap/app_of_apps_deploy_key/) reference.

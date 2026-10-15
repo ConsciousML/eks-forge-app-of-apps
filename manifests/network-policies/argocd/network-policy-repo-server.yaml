@@ -50,8 +50,8 @@ spec:
         - ports:
             - port: "6379"
               protocol: TCP
-    # Git over HTTPS (repo_url is https://github.com/..., see app_of_apps/terragrunt.hcl) and
-    # Helm/OCI chart repos.
+    # Git over HTTPS or over SSH on ssh.github.com:443 (app_of_apps_repo_url in the catalog's
+    # root.hcl), and Helm and OCI chart repos.
     - toEntities:
         - world
       toPorts:
