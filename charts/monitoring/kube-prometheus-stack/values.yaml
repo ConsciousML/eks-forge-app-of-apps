@@ -583,9 +583,6 @@ kube-prometheus-stack:
         application-overview:
           gnetId: 19974
           revision: 6
-        notifications-overview:
-          gnetId: 19975
-          revision: 8
       # https://grafana.com/grafana/dashboards/17781-loki-metrics-dashboard/
       loki:
         loki-metrics-dashboard:
