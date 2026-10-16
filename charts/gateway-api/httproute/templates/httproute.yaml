@@ -12,11 +12,6 @@ spec:
       kind: Gateway
       name: {{ .Values.gateway.name | quote }}
       namespace: {{ .Values.gateway.namespace | quote }}
-      sectionName: http
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: {{ .Values.gateway.name | quote }}
-      namespace: {{ .Values.gateway.namespace | quote }}
       sectionName: https
   hostnames:
     - {{ .Values.host | quote }}

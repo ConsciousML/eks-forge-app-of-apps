@@ -8,7 +8,7 @@ For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 
 ## What's Inside
 
-- **[templates/httproute.yaml](templates/httproute.yaml)**: binds to both the `http` and `https` listeners of the target `Gateway`
+- **[templates/httproute.yaml](templates/httproute.yaml)**: binds to the `https` listener of the target `Gateway` only. The `http` listener only redirects to HTTPS, through the [`gateway`](../gateway) chart's redirect route
 - **[values.yaml](values.yaml)**: empty defaults, see [Values](#values)
 - **[values.schema.json](values.schema.json)**: rejects an empty `host` or `backendRefs.default.name`
 - **[placeholder-values.yaml](placeholder-values.yaml)**: used only by `scripts/validate-helm.sh`, so standalone `helm template` and kubeconform pass
