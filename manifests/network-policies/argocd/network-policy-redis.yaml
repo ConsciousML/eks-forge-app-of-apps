@@ -16,8 +16,6 @@ spec:
             app.kubernetes.io/name: argocd-application-controller
         - matchLabels:
             app.kubernetes.io/name: argocd-applicationset-controller
-        - matchLabels:
-            app.kubernetes.io/name: argocd-notifications-controller
       toPorts:
         - ports:
             - port: "6379"
