@@ -11,6 +11,8 @@ Pick the gateway that fits your app. Each one is an [Application Load Balancer](
 - **Public**: reachable from the internet, at `<subdomain>.public.<env>.<base_domain>` (e.g. podinfo, at `podinfo.public.dev.example.com`).
 - **Private**: reachable only from inside the VPC or over [Tailscale](/docs/networking/tailscale/), at `<subdomain>.private.<env>.<base_domain>` (e.g. Goldilocks, at `goldilocks.private.dev.example.com`).
 
+Both serve your app over HTTPS only. A request over HTTP gets a 301 redirect to HTTPS.
+
 For why there are two gateways, and how a request reaches your app, see [How Ingress Works](/docs/networking/how-ingress-works/).
 
 ## In Your App of Apps Fork

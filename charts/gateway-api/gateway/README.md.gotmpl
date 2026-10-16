@@ -9,6 +9,7 @@ For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 ## What's Inside
 
 - **[templates/gateway.yaml](templates/gateway.yaml)**: the `Gateway`, with an `http` (80) and an `https` (443) listener accepting routes from all namespaces
+- **[templates/http-redirect-httproute.yaml](templates/http-redirect-httproute.yaml)**: `HTTPRoute` on the `http` listener redirecting every host to HTTPS with a 301, so apps are served only over HTTPS
 - **[templates/load-balancer-configuration.yaml](templates/load-balancer-configuration.yaml)**: `certificateArn` becomes the default certificate for the `HTTPS:443` listener
 - **[templates/target-group-configuration.yaml](templates/target-group-configuration.yaml)**: `targetType: ip`, so the ALB targets pod IPs directly instead of node ports
 - **[values.yaml](values.yaml)**: empty defaults, see [Values](#values)
@@ -21,7 +22,7 @@ For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 
 ## Sync Waves
 
-Each template sets its own `argocd.argoproj.io/sync-wave`, ordering the three resources within one Application. The `syncWave` on the `gateway-public` and `gateway-private` entries in `apps/values.yaml` is separate. It orders this Application against the others.
+Each template sets its own `argocd.argoproj.io/sync-wave`, ordering the resources within one Application. The `syncWave` on the `gateway-public` and `gateway-private` entries in `apps/values.yaml` is separate. It orders this Application against the others.
 
 ## Upstream Dependencies
 
