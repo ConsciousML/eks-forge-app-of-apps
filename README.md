@@ -28,6 +28,10 @@ This repository holds its Kubernetes-side Helm charts and manifests, deployed by
 
 For how the repositories fit together, see [Platform Architecture](https://eks-forge.readthedocs.io/latest/docs/architecture/#platform-architecture).
 
+## Get Started
+
+The [Deploy Your Applications](https://eks-forge.readthedocs.io/latest/docs/applications/get-started/) tutorial walks you through forking this repository and shipping a change to the `dev` cluster through ArgoCD. It builds on the cluster you deploy in the [Quickstart](https://eks-forge.readthedocs.io/latest/docs/quickstart/).
+
 ## Support
 
 Support is provided on a best-effort basis. If you have feedback, feature ideas, or wish to report a bug, please use the [issues](https://github.com/ConsciousML/eks-forge-app-of-apps/issues) of this repository, or the [EKS Forge issues](https://github.com/ConsciousML/eks-forge/issues) for anything not specific to it.
