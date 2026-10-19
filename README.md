@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  The app of apps repository of EKS Forge
+  The App of Apps repository of EKS Forge
 </p>
 
 <p align="center">
