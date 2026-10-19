@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  The GitOps repository of EKS Forge
+  The app of apps repository of EKS Forge
 </p>
 
 <p align="center">
