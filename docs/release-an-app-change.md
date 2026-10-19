@@ -16,7 +16,7 @@ locals {
 }
 ```
 
-Otherwise, `staging` and `prod` keep syncing the original app of apps repository. With `app_of_apps_private = true`, ArgoCD reads your fork with the read-only key of the [App of Apps Deploy Key](/docs/reference/bootstrap/app_of_apps_deploy_key/) bootstrap, which you ran in [Enable README Generation in CI](/docs/applications/get-started/app-of-apps-setup/#enable-readme-generation-in-ci).
+Otherwise, `staging` and `prod` keep syncing the original app of apps repository. Set `app_of_apps_private` to `true` if your fork is private, `false` if it's public.
 
 ## Tag the App of Apps Fork
 
