@@ -6,7 +6,7 @@ In this tutorial, you'll fork the [ArgoCD app of apps repository](https://github
 ## Fork the App of Apps Repository
 The app of apps repository holds the [Helm charts](https://helm.sh/docs/topics/charts/) and manifests that [ArgoCD](https://argo-cd.readthedocs.io/en/stable/) syncs into your cluster. Like the catalog and live repositories, it's meant to be forked and extended.
 
-First, create an empty repository from [GitHub's new repository page](https://github.com/new). Make it private or public. If it's private, also set `app_of_apps_private = true` in [Point the Catalog at Your Fork](#point-the-catalog-at-your-fork). Leave the README, `.gitignore`, and license options unset.
+First, create an empty repository from [GitHub's new repository page](https://github.com/new), private or public. Leave the README, `.gitignore`, and license options unset.
 
 Then, set your GitHub owner (user or organization) and the name of the repository you created, by replacing the `<...>`:
 ```bash
@@ -72,6 +72,8 @@ locals {
   ...
 }
 ```
+Set `app_of_apps_private` to `true` if your fork is private, `false` if it's public.
+
 On your next `dev` deployment, ArgoCD syncs every application from your fork instead of the original app of apps repository.
 
 ## Enable README Generation in CI

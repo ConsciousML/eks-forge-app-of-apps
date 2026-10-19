@@ -6,16 +6,17 @@ This guide shows you how to ship the changes merged in your [app of apps fork](/
 
 ## Point Live at Your App of Apps Fork
 
-From the root of your live fork, ensure these two values in [`live/github.hcl`](https://github.com/ConsciousML/eks-forge-live/blob/main/live/github.hcl) point at your app of apps fork:
+From the root of your live fork, ensure these values in [`live/github.hcl`](https://github.com/ConsciousML/eks-forge-live/blob/main/live/github.hcl) point at your app of apps fork:
 ```hcl
 locals {
   github_owner_app_of_apps     = "<your-github-username-or-org-name-where-your-app-of-apps-fork-is>"
   github_repo_name_app_of_apps = "<your-app-of-apps-repo-name>"
+  app_of_apps_private          = <true-if-your-fork-is-private>
   ...
 }
 ```
 
-Otherwise, `staging` and `prod` keep syncing the original app of apps repository.
+Otherwise, `staging` and `prod` keep syncing the original app of apps repository. Set `app_of_apps_private` to `true` if your fork is private, `false` if it's public.
 
 ## Tag the App of Apps Fork
 
