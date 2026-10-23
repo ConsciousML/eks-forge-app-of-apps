@@ -74,6 +74,13 @@ locals {
 ```
 Set `app_of_apps_private` to `true` if your fork is private, `false` if it's public.
 
+Then, commit and push it, so the catalog CI deploys your fork too:
+```bash
+git add pipelines/github.hcl
+git commit -m "chore: point the catalog at my app of apps fork"
+git push origin main
+```
+
 On your next `dev` deployment, ArgoCD syncs every application from your fork instead of the original app of apps repository.
 
 ## Enable README Generation in CI
