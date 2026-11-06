@@ -28,5 +28,7 @@ data:
     };
 
     export default function () {
-      http.get('http://podinfo.podinfo.svc.cluster.local:9898/');
+      // TEMP: injects 5xx and slow requests so the SLO alerts fire, revert before merging.
+      http.get('http://podinfo.podinfo.svc.cluster.local:9898/status/500');
+      http.get('http://podinfo.podinfo.svc.cluster.local:9898/delay/1');
     }
