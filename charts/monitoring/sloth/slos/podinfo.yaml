@@ -19,7 +19,7 @@ spec:
           component: slo
         annotations:
           summary: "podinfo is burning its availability error budget"
-          description: "podinfo 5xx ratio burns the 30d error budget of its 99% availability SLO too fast ({{ $labels.sloth_severity }} burn rate)."
+          description: "podinfo 5xx ratio burns the 30d error budget of its 99% availability SLO too fast."
         pageAlert:
           labels:
             severity: critical
@@ -43,7 +43,7 @@ spec:
           component: slo
         annotations:
           summary: "podinfo is burning its latency error budget"
-          description: "podinfo requests over 100ms burn the 30d error budget of its 99% latency SLO too fast ({{ $labels.sloth_severity }} burn rate)."
+          description: "podinfo requests over 100ms burn the 30d error budget of its 99% latency SLO too fast."
         pageAlert:
           labels:
             severity: critical
