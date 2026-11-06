@@ -10,10 +10,10 @@ kube-prometheus-stack:
   pagerduty:
     # -- Routes `slo` page alerts to PagerDuty on top of Slack. Injected by the catalog via `appParams`.
     # @section -- Release
-    enabled: false
+    enabled: null
     # -- Events API v2 endpoint of the PagerDuty account's region. Injected by the catalog via `appParams`.
     # @section -- Release
-    eventsUrl: https://events.pagerduty.com/v2/enqueue
+    eventsUrl: ""
 
   # Installed by the catalog's prometheus_operator_crds unit ahead of ArgoCD, not this chart,
   # so the ServiceMonitor CRD already exists by first sync instead of only after this app.
