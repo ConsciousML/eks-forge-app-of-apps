@@ -1,0 +1,6 @@
+dependencies:
+- name: sloth
+  repository: https://slok.github.io/sloth
+  version: 0.16.0
+digest: sha256:d75eb1b4e0eeab12a8d51bd37f0c13e36777f1985c420dfddb9c4586bcf263b0
+generated: "2026-11-06T12:44:46.205127-06:00"

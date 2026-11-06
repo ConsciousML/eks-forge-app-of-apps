@@ -378,6 +378,14 @@ kube-prometheus-stack:
             matchers:
               - component = "uptime"
               - severity = "warning"
+          - receiver: "slo-critical"
+            matchers:
+              - component = "slo"
+              - severity = "critical"
+          - receiver: "slo-warning"
+            matchers:
+              - component = "slo"
+              - severity = "warning"
       receivers:
         - name: "null"
         - name: "unrouted"
@@ -427,6 +435,14 @@ kube-prometheus-stack:
         - name: "uptime-warning"
           slack_configs:
             - channel: "#{{ .Values.environment }}-uptime-warning"
+              send_resolved: true
+        - name: "slo-critical"
+          slack_configs:
+            - channel: "#{{ .Values.environment }}-slo-critical"
+              send_resolved: true
+        - name: "slo-warning"
+          slack_configs:
+            - channel: "#{{ .Values.environment }}-slo-warning"
               send_resolved: true
 
   grafana:
@@ -546,7 +562,13 @@ kube-prometheus-stack:
             type: file
             options:
               path: /var/lib/grafana/dashboards/blackbox-exporter
-    # -- Addon dashboards (Karpenter, ExternalDNS, AWS Load Balancer Controller, External Secrets Operator, ArgoCD, Loki, and blackbox-exporter), each in its own folder from `dashboardProviders`.
+          - name: sloth
+            orgId: 1
+            folder: SLOs
+            type: file
+            options:
+              path: /var/lib/grafana/dashboards/sloth
+    # -- Addon dashboards (Karpenter, ExternalDNS, AWS Load Balancer Controller, External Secrets Operator, ArgoCD, Loki, blackbox-exporter, and Sloth), each in its own folder from `dashboardProviders`.
     # @section -- Grafana
     # @default -- see values.yaml
     dashboards:
@@ -595,6 +617,19 @@ kube-prometheus-stack:
         blackbox-exporter-dashboard:
           gnetId: 14928
           revision: 6
+          datasource:
+            - { name: DS_PROMETHEUS, value: Prometheus }
+      # https://grafana.com/grafana/dashboards/14643-high-level-sloth-slos/
+      sloth:
+        sloth-high-level:
+          gnetId: 14643
+          revision: 2
+          datasource:
+            - { name: DS_PROMETHEUS, value: Prometheus }
+        # https://grafana.com/grafana/dashboards/14348-slo-detail/
+        sloth-slo-detail:
+          gnetId: 14348
+          revision: 5
           datasource:
             - { name: DS_PROMETHEUS, value: Prometheus }
     admin:

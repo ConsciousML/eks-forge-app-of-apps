@@ -1,0 +1,9 @@
+apiVersion: v2
+name: sloth
+description: Sloth controller, generates SLO recording rules and burn-rate alerts from PrometheusServiceLevel resources
+type: application
+version: 0.1.0
+dependencies:
+  - name: sloth
+    version: 0.16.0
+    repository: https://slok.github.io/sloth

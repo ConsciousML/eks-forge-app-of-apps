@@ -239,6 +239,16 @@ applications:
       namespace: monitoring
     syncWave: 8
 
+  # --- Sloth ---
+  # PrometheusRule CRD is Terraform-managed. The PrometheusServiceLevel CRD ships with the chart.
+  # Depends on:
+  # - network-policies-cluster-wide
+  - name: sloth
+    path: charts/monitoring/sloth
+    destination:
+      namespace: monitoring
+    syncWave: 4
+
   # --- Prometheus Rules ---
   - name: prometheus-rules
     path: charts/monitoring/prometheus-rules

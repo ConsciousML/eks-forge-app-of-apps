@@ -2,7 +2,7 @@
 
 # How to Add an Alert Route & Slack Channel
 
-This guide shows you how to send the alerts of a new `component` to their own Slack channels, one per severity. You need it when an alert fits none of the existing components (`k8s`, `prometheus-stack`, `loki`, `argocd`, and `uptime`), since [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) sends it to `#<environment>-unrouted` otherwise. It assumes you've created a branch in both forks, as in [Point Dev at Your Branch](/docs/applications/add-edit-or-remove-an-app/#point-dev-at-your-branch).
+This guide shows you how to send the alerts of a new `component` to their own Slack channels, one per severity. You need it when an alert fits none of the existing components (`k8s`, `prometheus-stack`, `loki`, `argocd`, `uptime`, and `slo`), since [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) sends it to `#<environment>-unrouted` otherwise. It assumes you've created a branch in both forks, as in [Point Dev at Your Branch](/docs/applications/add-edit-or-remove-an-app/#point-dev-at-your-branch).
 
 First, pick a name for your component, with only lowercase letters, digits, and hyphens (e.g. `uptime`). It ends up in the name of its channels, `<environment>-<component>-critical` and `<environment>-<component>-warning`.
 

@@ -182,3 +182,11 @@ misconfigurations:
       (get/list). Vendored upstream chart with no values option to scope
       resources below '*' for this apiGroup; inherent to the dashboard's
       function.
+  - id: AVD-KSV-0046
+    paths:
+      - "charts/monitoring/sloth/charts/sloth/templates/cluster-role.yaml"
+    statement: >
+      The wildcard is scoped to the sloth.slok.dev API group only, the
+      controller's own PrometheusServiceLevel resources. It grants nothing
+      on core or other API groups. Vendored upstream chart, the rule is
+      inherent to the controller's function.
