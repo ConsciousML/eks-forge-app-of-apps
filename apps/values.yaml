@@ -358,9 +358,18 @@ applications:
     extraValueFiles:
       - charts/external-secrets-operator/secret-sync/alertmanager-secrets-values.yaml
   # Depends on:
+  # - external-secrets-operator
+  - name: alertmanager-pagerduty-secrets
+    path: charts/external-secrets-operator/secret-sync
+    destination:
+      namespace: monitoring
+    syncWave: 5
+    extraValueFiles:
+      - charts/external-secrets-operator/secret-sync/alertmanager-pagerduty-secrets-values.yaml
+  # Depends on:
   # - grafana-secrets (needs the admin secret before Grafana's first boot)
-  # - alertmanager-secrets (Alertmanager mounts it via alertmanagerSpec.secrets, so it must
-  #   exist before the pod can start)
+  # - alertmanager-secrets and alertmanager-pagerduty-secrets (Alertmanager mounts both via
+  #   alertmanagerSpec.secrets, so they must exist before the pod can start)
   # - network-policies-cluster-wide
   - name: kube-prometheus-stack
     path: charts/monitoring/kube-prometheus-stack

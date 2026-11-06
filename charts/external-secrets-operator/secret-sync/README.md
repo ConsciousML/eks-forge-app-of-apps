@@ -14,6 +14,7 @@ For setup steps, read [How to Pass a Secret to an App](/docs/applications/pass-a
 - **[values.schema.json](values.schema.json)**: rejects the values the catalog injects via `appParams` when empty, so a missing injection fails the render
 - **[placeholder-values.yaml](placeholder-values.yaml)**: used only by `scripts/validate-helm.sh`, so standalone `helm template` and kubeconform pass
 - **[alertmanager-secrets-values.yaml](alertmanager-secrets-values.yaml)**: syncs the Alertmanager Slack bot token. `remoteProperty` must match the `secret_data` key in the catalog's `units/eks/addons/prometheus_stack/alertmanager/aws_secret_slack_bot`
+- **[alertmanager-pagerduty-secrets-values.yaml](alertmanager-pagerduty-secrets-values.yaml)**: syncs the Alertmanager PagerDuty routing key. `remoteProperty` must match the `secret_data` key in the catalog's `units/pagerduty/aws_secret`
 - **[argocd-secrets-values.yaml](argocd-secrets-values.yaml)**: syncs the ArgoCD admin password hash. Uses `targetCreationPolicy: Merge`, since `argocd-secret` is also managed by ArgoCD itself
 - **[grafana-secrets-values.yaml](grafana-secrets-values.yaml)**: syncs the Grafana admin password. Also sets `kube-prometheus-stack.grafana.admin.existingSecret` and `passwordKey`, consumed by `kube-prometheus-stack` through the same `extraValueFiles` entry so both charts agree on the target secret name
 - **[tailscale-secrets-values.yaml](tailscale-secrets-values.yaml)**: syncs the Tailscale operator's OAuth client credentials
@@ -24,19 +25,19 @@ For setup steps, read [How to Pass a Secret to an App](/docs/applications/pass-a
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| secretStoreName | string | `""` | `SecretStore` name. Injected per instance by the catalog via `appParams`. |
 | awsRegion | string | `""` | AWS region of the Secrets Manager secret. Injected per instance by the catalog via `appParams`. |
 | remoteKey | string | `""` | Secrets Manager secret name, the `secret_name` output of the catalog unit creating it. Injected per instance by the catalog via `appParams`. |
+| secretStoreName | string | `""` | `SecretStore` name. Injected per instance by the catalog via `appParams`. |
 
 ### Target Secret
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| name | string | `""` | `ExternalSecret` name. |
-| targetSecretName | string | `""` | Kubernetes `Secret` to write. |
-| targetCreationPolicy | string | `Merge` when empty | `Owner` creates and owns the `Secret`. `Merge` writes into an existing one. |
-| refreshPolicy | string | `CreatedOnce` when empty | `CreatedOnce` syncs once. `Periodic` keeps polling, for rotated secrets. |
 | data | list | `[]` | Keys to sync, each a `secretKey` in the target `Secret` and a `remoteProperty` in the AWS secret's JSON. |
+| name | string | `""` | `ExternalSecret` name. |
+| refreshPolicy | string | `CreatedOnce` when empty | `CreatedOnce` syncs once. `Periodic` keeps polling, for rotated secrets. |
+| targetCreationPolicy | string | `Merge` when empty | `Owner` creates and owns the `Secret`. `Merge` writes into an existing one. |
+| targetSecretName | string | `""` | Kubernetes `Secret` to write. |
 
 ## Upstream Dependencies
 

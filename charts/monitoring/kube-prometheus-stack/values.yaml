@@ -7,6 +7,13 @@ kube-prometheus-stack:
   # -- Environment name, prefixes each Slack channel in `alertmanager.config`. Injected by the catalog via `appParams`.
   # @section -- Release
   environment: ""
+  pagerduty:
+    # -- Routes `slo` page alerts to PagerDuty on top of Slack. Injected by the catalog via `appParams`.
+    # @section -- Release
+    enabled: false
+    # -- Events API v2 endpoint of the PagerDuty account's region. Injected by the catalog via `appParams`.
+    # @section -- Release
+    eventsUrl: https://events.pagerduty.com/v2/enqueue
 
   # Installed by the catalog's prometheus_operator_crds unit ahead of ArgoCD, not this chart,
   # so the ServiceMonitor CRD already exists by first sync instead of only after this app.
@@ -278,11 +285,12 @@ kube-prometheus-stack:
       # The Prometheus Operator mounts each key of this Secret as a file under
       # /etc/alertmanager/secrets/alertmanager-slack-bot/, which config.global.http_config below
       # points at.
-      # -- Mounts the Slack bot token `Secret`. Must match `targetSecretName` in `secret-sync/alertmanager-secrets-values.yaml`.
+      # -- Mounts the Slack bot token and PagerDuty routing key `Secret`s. Each must match `targetSecretName` in `secret-sync/alertmanager-secrets-values.yaml` and `secret-sync/alertmanager-pagerduty-secrets-values.yaml`.
       # @section -- Alertmanager
       # @default -- see values.yaml
       secrets:
         - alertmanager-slack-bot
+        - alertmanager-pagerduty
 
     # Renders config through Helm's tpl before writing the alertmanager secret, so the
     # "{{ .Values.environment }}-" prefix on each receiver's channel below resolves.
@@ -378,7 +386,8 @@ kube-prometheus-stack:
             matchers:
               - component = "uptime"
               - severity = "warning"
-          - receiver: "slo-critical"
+          # pagerduty.enabled adds the PagerDuty page on top of Slack.
+          - receiver: "slo-critical{{ if .Values.pagerduty.enabled }}-pagerduty{{ end }}"
             matchers:
               - component = "slo"
               - severity = "critical"
@@ -439,6 +448,16 @@ kube-prometheus-stack:
         - name: "slo-critical"
           slack_configs:
             - channel: "#{{ .Values.environment }}-slo-critical"
+              send_resolved: true
+        - name: "slo-critical-pagerduty"
+          slack_configs:
+            - channel: "#{{ .Values.environment }}-slo-critical"
+              send_resolved: true
+          # send_resolved closes the incident once the alert group resolves.
+          pagerduty_configs:
+            - routing_key_file: /etc/alertmanager/secrets/alertmanager-pagerduty/routing_key
+              url: "{{ .Values.pagerduty.eventsUrl }}"
+              severity: critical
               send_resolved: true
         - name: "slo-warning"
           slack_configs:
