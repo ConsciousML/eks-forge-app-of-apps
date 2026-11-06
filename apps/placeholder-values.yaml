@@ -80,6 +80,10 @@ appParams:
     secretStoreName: "placeholder-store"
     awsRegion: "us-east-1"
     remoteKey: "placeholder-key"
+  alertmanager-pagerduty-secrets:
+    secretStoreName: "placeholder-store"
+    awsRegion: "us-east-1"
+    remoteKey: "placeholder-key"
   kube-prometheus-stack:
     kube-prometheus-stack:
       fullnameOverride: "kube-prometheus-stack"

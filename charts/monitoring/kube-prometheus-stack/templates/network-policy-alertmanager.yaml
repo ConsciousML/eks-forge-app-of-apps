@@ -56,7 +56,7 @@ spec:
               protocol: TCP
             - port: "9094"
               protocol: UDP
-    # Slack notifications, see config.global.slack_api_url in values.yaml.
+    # Slack and PagerDuty notifications, see config.global.slack_api_url and pagerduty.eventsUrl in values.yaml.
     - toEntities:
         - world
       toPorts:

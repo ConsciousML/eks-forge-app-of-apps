@@ -6,10 +6,18 @@
   "properties": {
     "kube-prometheus-stack": {
       "type": "object",
-      "required": ["fullnameOverride", "environment", "prometheus", "alertmanager"],
+      "required": ["fullnameOverride", "environment", "pagerduty", "prometheus", "alertmanager"],
       "properties": {
         "fullnameOverride": { "type": "string", "minLength": 1 },
         "environment": { "type": "string", "minLength": 1 },
+        "pagerduty": {
+          "type": "object",
+          "required": ["enabled", "eventsUrl"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "eventsUrl": { "type": "string", "minLength": 1 }
+          }
+        },
         "prometheus": {
           "type": "object",
           "required": ["prometheusSpec"],

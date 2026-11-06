@@ -49,6 +49,7 @@
         "tailscale-connector": { "type": "object" },
         "grafana-secrets": { "type": "object" },
         "alertmanager-secrets": { "type": "object" },
+        "alertmanager-pagerduty-secrets": { "type": "object" },
         "kube-prometheus-stack": { "type": "object" },
         "grafana-httproute": { "type": "object" },
         "prometheus-httproute": { "type": "object" },

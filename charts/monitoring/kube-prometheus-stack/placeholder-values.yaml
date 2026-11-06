@@ -5,6 +5,9 @@
 kube-prometheus-stack:
   fullnameOverride: "kube-prometheus-stack"
   environment: "dev"
+  pagerduty:
+    enabled: false
+    eventsUrl: "https://events.pagerduty.com/v2/enqueue"
   prometheus:
     prometheusSpec:
       externalUrl: "https://placeholder.example.com"

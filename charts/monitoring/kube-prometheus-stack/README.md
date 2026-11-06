@@ -24,6 +24,8 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 |-----|------|---------|-------------|
 | kube-prometheus-stack.fullnameOverride | string | `""` | Names this chart's own resources. Must match `tool.helm.releaseName` in `apps/values.yaml`. Injected by the catalog via `appParams`. |
 | kube-prometheus-stack.environment | string | `""` | Environment name, prefixes each Slack channel in `alertmanager.config`. Injected by the catalog via `appParams`. |
+| kube-prometheus-stack.pagerduty.enabled | bool | `nil` | Routes `slo` page alerts to PagerDuty on top of Slack. Injected by the catalog via `appParams`. |
+| kube-prometheus-stack.pagerduty.eventsUrl | string | `""` | Events API v2 endpoint of the PagerDuty account's region. Injected by the catalog via `appParams`. |
 | kube-prometheus-stack.crds.enabled | bool | `false` | Disabled, the catalog's `prometheus_operator_crds` unit installs the CRDs before ArgoCD syncs. |
 | kube-prometheus-stack.kubeEtcd | object | see values.yaml | Disabled with `kubeScheduler` and `kubeControllerManager`, AWS-managed on EKS. |
 
@@ -54,7 +56,7 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | kube-prometheus-stack.alertmanager.alertmanagerSpec.replicas | int | `3` | Alertmanager replicas, each with its own `gp3` PVC. Hard pod anti-affinity, spread across AZs, and a PDB keeping a majority up. |
-| kube-prometheus-stack.alertmanager.alertmanagerSpec.secrets | list | see values.yaml | Mounts the Slack bot token `Secret`. Must match `targetSecretName` in `secret-sync/alertmanager-secrets-values.yaml`. |
+| kube-prometheus-stack.alertmanager.alertmanagerSpec.secrets | list | see values.yaml | Mounts the Slack bot token and PagerDuty routing key `Secret`s. Each must match `targetSecretName` in `secret-sync/alertmanager-secrets-values.yaml` and `secret-sync/alertmanager-pagerduty-secrets-values.yaml`. |
 | kube-prometheus-stack.alertmanager.config | object | see values.yaml | Slack routing tree, one `<environment>-<component>-<severity>` channel per route. Unmatched alerts go to `<environment>-unrouted`. |
 
 ### Grafana

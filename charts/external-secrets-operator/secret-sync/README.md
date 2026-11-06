@@ -14,6 +14,7 @@ For setup steps, read [How to Pass a Secret to an App](/docs/applications/pass-a
 - **[values.schema.json](values.schema.json)**: rejects the values the catalog injects via `appParams` when empty, so a missing injection fails the render
 - **[placeholder-values.yaml](placeholder-values.yaml)**: used only by `scripts/validate-helm.sh`, so standalone `helm template` and kubeconform pass
 - **[alertmanager-secrets-values.yaml](alertmanager-secrets-values.yaml)**: syncs the Alertmanager Slack bot token. `remoteProperty` must match the `secret_data` key in the catalog's `units/eks/addons/prometheus_stack/alertmanager/aws_secret_slack_bot`
+- **[alertmanager-pagerduty-secrets-values.yaml](alertmanager-pagerduty-secrets-values.yaml)**: syncs the Alertmanager PagerDuty routing key. `remoteProperty` must match the `secret_data` key in the catalog's `units/pagerduty/aws_secret`
 - **[argocd-secrets-values.yaml](argocd-secrets-values.yaml)**: syncs the ArgoCD admin password hash. Uses `targetCreationPolicy: Merge`, since `argocd-secret` is also managed by ArgoCD itself
 - **[grafana-secrets-values.yaml](grafana-secrets-values.yaml)**: syncs the Grafana admin password. Also sets `kube-prometheus-stack.grafana.admin.existingSecret` and `passwordKey`, consumed by `kube-prometheus-stack` through the same `extraValueFiles` entry so both charts agree on the target secret name
 - **[tailscale-secrets-values.yaml](tailscale-secrets-values.yaml)**: syncs the Tailscale operator's OAuth client credentials
