@@ -457,6 +457,8 @@ kube-prometheus-stack:
           pagerduty_configs:
             - routing_key_file: /etc/alertmanager/secrets/alertmanager-pagerduty/routing_key
               url: "{{ .Values.pagerduty.eventsUrl }}"
+              # Backticks escape Helm's tpl, so Alertmanager renders the summary at send time.
+              description: '{{`{{ .CommonAnnotations.summary }}`}}'
               severity: critical
               send_resolved: true
         - name: "slo-warning"
