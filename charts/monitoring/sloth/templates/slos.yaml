@@ -1,5 +1,0 @@
-{{- /* Raw files, not templates: Sloth's {{.window}} must reach the controller unrendered. */}}
-{{- range $path, $_ := .Files.Glob "slos/*.yaml" }}
----
-{{ $.Files.Get $path }}
-{{- end }}

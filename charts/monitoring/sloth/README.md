@@ -2,18 +2,18 @@
 
 # `sloth` Helm Chart Reference
 
-The [`sloth` chart](./) deploys the [Sloth](https://sloth.dev/) controller via the upstream `sloth` chart. The controller turns each `PrometheusServiceLevel` into a `PrometheusRule` holding the SLI recording rules, one per window, and the multi-window multi-burn-rate page and ticket alerts. [Values](#values) lists only what this chart sets. For every other key, read the upstream [`values.yaml`](https://github.com/slok/sloth/blob/main/deploy/kubernetes/helm/sloth/values.yaml).
+The [`sloth` chart](./) deploys the [Sloth](https://sloth.dev/) controller via the upstream `sloth` chart. The controller turns each `PrometheusServiceLevel` in the cluster into a `PrometheusRule` in the same namespace, holding the SLI recording rules, one per window, and the multi-window multi-burn-rate page and ticket alerts. [Values](#values) lists only what this chart sets. For every other key, read the upstream [`values.yaml`](https://github.com/slok/sloth/blob/main/deploy/kubernetes/helm/sloth/values.yaml).
+
+Each app ships its own `PrometheusServiceLevel` next to its manifests (e.g. [`manifests/podinfo/podinfo-slo.yaml`](../../../manifests/podinfo/podinfo-slo.yaml)). The CRD is installed by [`crds-sloth`](../../../manifests/crds/sloth/), not by this chart.
 
 ## What's Inside
 
-- **[slos/](slos/)**: one `PrometheusServiceLevel` per service, as `<service>.yaml`, rendered as raw files by `templates/slos.yaml` so Sloth's `{{.window}}` variable reaches the controller unrendered
-  - **[podinfo.yaml](slos/podinfo.yaml)**: podinfo's availability (non-5xx) and latency (100ms or less) SLOs, 99% over 30 days
 - **[templates/network-policy.yaml](templates/network-policy.yaml)**: the controller's `CiliumNetworkPolicy`
 - **[values.yaml](values.yaml)**: see [Values](#values)
 
 ## Alerts
 
-Every SLO sets `component: slo` on its alerts. Page alerts carry `severity: critical`, and ticket alerts carry `severity: warning`. Alertmanager routes them to `#<environment>-slo-critical` and `#<environment>-slo-warning`.
+Every SLO sets `component: slo` on its alerts. Page alerts carry `severity: critical`, and ticket alerts carry `severity: warning`. Alertmanager routes them to `#<environment>-slo-critical` and `#<environment>-slo-warning`. While a page alert fires, Alertmanager inhibits the ticket alert of the same SLO, since both share an `alertname`.
 
 | Alert | Burn rate | Long window | Short window |
 |-------|-----------|-------------|--------------|
@@ -37,4 +37,5 @@ Windows are Sloth's defaults for a 30 day SLO period.
 
 ## Upstream Dependencies
 
+- **[`crds-sloth`](../../../manifests/crds/sloth/)**: installs the `PrometheusServiceLevel` CRD
 - **[`kube-prometheus-stack`](../kube-prometheus-stack)**: Prometheus loads the generated `PrometheusRule`s, Alertmanager routes the alerts by their `component: slo` label, and Grafana's **SLOs** folder holds Sloth's dashboards
