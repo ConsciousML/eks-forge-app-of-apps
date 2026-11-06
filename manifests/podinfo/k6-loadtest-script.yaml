@@ -28,5 +28,6 @@ data:
     };
 
     export default function () {
-      http.get('http://podinfo.podinfo.svc.cluster.local:9898/');
+      // TEMP: injects 5xx so the SLO page alert fires, revert before merging.
+      http.get('http://podinfo.podinfo.svc.cluster.local:9898/status/500');
     }
