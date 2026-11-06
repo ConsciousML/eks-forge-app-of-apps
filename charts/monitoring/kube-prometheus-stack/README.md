@@ -62,7 +62,7 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | kube-prometheus-stack.grafana.additionalDataSources | list | see values.yaml | Adds Loki as a datasource. Prometheus stays the default. |
-| kube-prometheus-stack.grafana.dashboards | object | see values.yaml | Addon dashboards (Karpenter, ExternalDNS, AWS Load Balancer Controller, External Secrets Operator, ArgoCD, Loki, and blackbox-exporter), each in its own folder from `dashboardProviders`. |
+| kube-prometheus-stack.grafana.dashboards | object | see values.yaml | Addon dashboards (Karpenter, ExternalDNS, AWS Load Balancer Controller, External Secrets Operator, ArgoCD, Loki, blackbox-exporter, and Sloth), each in its own folder from `dashboardProviders`. |
 | kube-prometheus-stack.grafana.admin.existingSecret | string | `""` | Admin credentials `Secret`, with `passwordKey`. Both set by `secret-sync/grafana-secrets-values.yaml`, loaded via `extraValueFiles`. |
 
 ## Resource Names

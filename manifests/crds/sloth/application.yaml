@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nested-app-crds-sloth
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/slok/sloth
+    path: deploy/kubernetes/helm/sloth/crds
+    # Must match the sloth dependency version in charts/monitoring/sloth/Chart.yaml.
+    targetRevision: sloth-helm-chart-0.16.0
+  syncPolicy:
+    syncOptions:
+      # CRDs are too large for client-side apply's annotation limit.
+      - ServerSideApply=true
+    automated:
+      prune: false
+      selfHeal: true

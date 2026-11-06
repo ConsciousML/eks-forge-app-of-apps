@@ -1,0 +1,52 @@
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusServiceLevel
+metadata:
+  name: podinfo
+spec:
+  service: podinfo
+  slos:
+    # Probes and scrapes excluded, always fast and 200. They would inflate both SLIs.
+    - name: requests-availability
+      objective: 99
+      description: "99% of podinfo HTTP requests return a non-5xx status."
+      sli:
+        events:
+          errorQuery: sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics", status=~"5.."}[{{.window}}]))
+          totalQuery: sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[{{.window}}]))
+      alerting:
+        name: PodinfoAvailabilityBudgetBurn
+        labels:
+          component: slo
+        annotations:
+          summary: "podinfo is burning its availability error budget"
+          description: "podinfo 5xx ratio burns the 30d error budget of its 99% availability SLO too fast."
+        pageAlert:
+          labels:
+            severity: critical
+        ticketAlert:
+          labels:
+            severity: warning
+    # Slow requests are the total minus the le="0.1" bucket. The threshold must be a bucket boundary.
+    - name: requests-latency
+      objective: 99
+      description: "99% of podinfo HTTP requests complete in 100ms or less."
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[{{.window}}]))
+            -
+            sum(rate(http_request_duration_seconds_bucket{namespace="podinfo", path!~"healthz|readyz|metrics", le="0.1"}[{{.window}}]))
+          totalQuery: sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[{{.window}}]))
+      alerting:
+        name: PodinfoLatencyBudgetBurn
+        labels:
+          component: slo
+        annotations:
+          summary: "podinfo is burning its latency error budget"
+          description: "podinfo requests over 100ms burn the 30d error budget of its 99% latency SLO too fast."
+        pageAlert:
+          labels:
+            severity: critical
+        ticketAlert:
+          labels:
+            severity: warning

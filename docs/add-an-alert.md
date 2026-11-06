@@ -12,7 +12,7 @@ If you've never seen an alert reach Slack, follow [Follow an Alert](/docs/monito
 ## Pick the Labels
 
 Your alert lands in the `#<environment>-<component>-<severity>` channel, so pick its two labels first:
-- `component`: one of `k8s`, `prometheus-stack`, `loki`, `argocd`, or `uptime`. If none fits what your alert watches, give it its own channels by following [Add an Alert Route & Slack Channel](/docs/monitoring/alerting/add-an-alert-route-and-slack-channel/) first. Without a route, your alert lands in `#<environment>-unrouted`.
+- `component`: one of `k8s`, `prometheus-stack`, `loki`, `argocd`, `uptime`, or `slo`. If none fits what your alert watches, give it its own channels by following [Add an Alert Route & Slack Channel](/docs/monitoring/alerting/add-an-alert-route-and-slack-channel/) first. Without a route, your alert lands in `#<environment>-unrouted`.
 - `severity`: `critical` or `warning`. An alert with `info` or `none` is never sent to Slack.
 
 ## Write the Rule

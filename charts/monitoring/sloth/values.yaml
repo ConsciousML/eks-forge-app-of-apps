@@ -1,0 +1,43 @@
+sloth:
+  # From the VPA target recommendation (goldilocks-sloth), revisit once more usage history
+  # accumulates.
+  # -- Resource requests and limits.
+  # @section -- Controller
+  # @default -- see values.yaml
+  resources:
+    requests: { cpu: 15m, memory: 100Mi }
+    limits: { memory: 100Mi }
+
+  # UID and GID 65532 are the distroless `nonroot` user of the Sloth image.
+  # -- Pod and container security contexts: non-root, read-only root filesystem, no capabilities.
+  # @section -- Controller
+  # @default -- see values.yaml
+  securityContext:
+    pod:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      seccompProfile:
+        type: RuntimeDefault
+    container:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+
+  # -- Pins the controller to the `elastic` NodePool, with a matching `tolerations` entry.
+  # @section -- Controller
+  # @default -- see values.yaml
+  nodeSelector:
+    karpenter.sh/nodepool: elastic
+  tolerations:
+    - key: karpenter.sh/workload-class
+      operator: Equal
+      value: elastic
+      effect: NoSchedule
+
+  # The git-sync sidecar pulls SLI plugins from GitHub. No SLO uses a plugin.
+  # -- Disables the common SLI plugins and their git-sync sidecar.
+  # @section -- Controller
+  commonPlugins:
+    enabled: false
