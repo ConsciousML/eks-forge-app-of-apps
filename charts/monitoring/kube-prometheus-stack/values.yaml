@@ -8,7 +8,7 @@ kube-prometheus-stack:
   # @section -- Release
   environment: ""
   pagerduty:
-    # -- Routes `slo` page alerts to PagerDuty on top of Slack. Injected by the catalog via `appParams`.
+    # -- (bool) Routes `slo` page alerts to PagerDuty on top of Slack. Injected by the catalog via `appParams`.
     # @section -- Release
     enabled: null
     # -- Events API v2 endpoint of the PagerDuty account's region. Injected by the catalog via `appParams`.
