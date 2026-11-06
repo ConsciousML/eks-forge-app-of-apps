@@ -1,11 +1,12 @@
 sloth:
-  # Upstream defaults, revisit once a VPA recommendation exists.
+  # From the VPA target recommendation (goldilocks-sloth), revisit once more usage history
+  # accumulates.
   # -- Resource requests and limits.
   # @section -- Controller
   # @default -- see values.yaml
   resources:
-    requests: { cpu: 5m, memory: 75Mi }
-    limits: { memory: 150Mi }
+    requests: { cpu: 15m, memory: 100Mi }
+    limits: { memory: 100Mi }
 
   # UID and GID 65532 are the distroless `nonroot` user of the Sloth image.
   # -- Pod and container security contexts: non-root, read-only root filesystem, no capabilities.
