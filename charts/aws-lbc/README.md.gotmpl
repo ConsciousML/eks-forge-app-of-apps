@@ -7,7 +7,7 @@ The [`aws-lbc` chart](./) deploys the [AWS Load Balancer Controller](https://kub
 ## What's Inside
 
 - **[Chart.yaml](Chart.yaml)**: dependency version must stay in sync with `local.version_aws_lbc` in the catalog's `terragrunt.stack.hcl`
-- **[templates/network-policy.yaml](templates/network-policy.yaml)**: the controller's `CiliumNetworkPolicy`. Egress to the ELBv2, EC2, Resource Groups Tagging, Shield, and ACM APIs is scoped via `toCIDR` to `vpcEndpointCidrs`, not `toEntities: world`
+- **[templates/network-policy.yaml](templates/network-policy.yaml)**: the controller's `CiliumNetworkPolicy`. Egress to the ELBv2, EC2, Resource Groups Tagging, and ACM APIs is scoped via `toCIDR` to `vpcEndpointCidrs`, not `toEntities: world`
 - **[values.yaml](values.yaml)**: see [Values](#values)
 - **[values.schema.json](values.schema.json)**: rejects the values the catalog injects via `appParams` when empty, so a missing injection fails the render
 - **[placeholder-values.yaml](placeholder-values.yaml)**: used only by `scripts/validate-helm.sh`, so standalone `helm template` and kubeconform pass

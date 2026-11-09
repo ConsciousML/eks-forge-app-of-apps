@@ -1,11 +1,10 @@
-# -- VPC interface endpoint IPs (`ec2`, `elasticloadbalancing`, `tagging`, `shield`, `acm`) the network policy allows egress to. Injected by the catalog via `appParams`.
+# -- VPC interface endpoint IPs (`ec2`, `elasticloadbalancing`, `tagging`, `acm`) the network policy allows egress to. Injected by the catalog via `appParams`.
 # @section -- Network Policy
 # @default -- see values.yaml
 vpcEndpointCidrs:
   ec2: []
   elasticloadbalancing: []
   tagging: []
-  shield: []
   acm: []
 
 aws-load-balancer-controller:
@@ -18,6 +17,9 @@ aws-load-balancer-controller:
   # -- VPC ID. Injected by the catalog via `appParams`.
   # @section -- AWS Load Balancer Controller
   vpcId: ""
+  # -- Disables the Shield Advanced check on every ALB reconcile, which needs a `shield` VPC endpoint. Shield Standard stays on.
+  # @section -- AWS Load Balancer Controller
+  enableShield: false
   # -- Disables the webhook that mutates `Service` resources of type `LoadBalancer`.
   # @section -- AWS Load Balancer Controller
   enableServiceMutatorWebhook: false
