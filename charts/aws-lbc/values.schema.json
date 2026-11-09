@@ -6,12 +6,11 @@
   "properties": {
     "vpcEndpointCidrs": {
       "type": "object",
-      "required": ["ec2", "elasticloadbalancing", "tagging", "shield", "acm"],
+      "required": ["ec2", "elasticloadbalancing", "tagging", "acm"],
       "properties": {
         "ec2": { "type": "array", "minItems": 1, "items": { "type": "string" } },
         "elasticloadbalancing": { "type": "array", "minItems": 1, "items": { "type": "string" } },
         "tagging": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-        "shield": { "type": "array", "minItems": 1, "items": { "type": "string" } },
         "acm": { "type": "array", "minItems": 1, "items": { "type": "string" } }
       }
     },

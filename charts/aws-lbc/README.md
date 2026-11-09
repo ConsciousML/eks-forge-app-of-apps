@@ -7,7 +7,7 @@ The [`aws-lbc` chart](./) deploys the [AWS Load Balancer Controller](https://kub
 ## What's Inside
 
 - **[Chart.yaml](Chart.yaml)**: dependency version must stay in sync with `local.version_aws_lbc` in the catalog's `terragrunt.stack.hcl`
-- **[templates/network-policy.yaml](templates/network-policy.yaml)**: the controller's `CiliumNetworkPolicy`. Egress to the ELBv2, EC2, Resource Groups Tagging, Shield, and ACM APIs is scoped via `toCIDR` to `vpcEndpointCidrs`, not `toEntities: world`
+- **[templates/network-policy.yaml](templates/network-policy.yaml)**: the controller's `CiliumNetworkPolicy`. Egress to the ELBv2, EC2, Resource Groups Tagging, and ACM APIs is scoped via `toCIDR` to `vpcEndpointCidrs`, not `toEntities: world`
 - **[values.yaml](values.yaml)**: see [Values](#values)
 - **[values.schema.json](values.schema.json)**: rejects the values the catalog injects via `appParams` when empty, so a missing injection fails the render
 - **[placeholder-values.yaml](placeholder-values.yaml)**: used only by `scripts/validate-helm.sh`, so standalone `helm template` and kubeconform pass
@@ -18,7 +18,7 @@ The [`aws-lbc` chart](./) deploys the [AWS Load Balancer Controller](https://kub
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| vpcEndpointCidrs | object | see values.yaml | VPC interface endpoint IPs (`ec2`, `elasticloadbalancing`, `tagging`, `shield`, `acm`) the network policy allows egress to. Injected by the catalog via `appParams`. |
+| vpcEndpointCidrs | object | see values.yaml | VPC interface endpoint IPs (`ec2`, `elasticloadbalancing`, `tagging`, `acm`) the network policy allows egress to. Injected by the catalog via `appParams`. |
 
 ### AWS Load Balancer Controller
 
@@ -27,6 +27,7 @@ The [`aws-lbc` chart](./) deploys the [AWS Load Balancer Controller](https://kub
 | aws-load-balancer-controller.clusterName | string | `""` | EKS cluster name. Injected by the catalog via `appParams`. |
 | aws-load-balancer-controller.region | string | `""` | AWS region. Injected by the catalog via `appParams`. |
 | aws-load-balancer-controller.vpcId | string | `""` | VPC ID. Injected by the catalog via `appParams`. |
+| aws-load-balancer-controller.enableShield | bool | `false` | Disables the Shield Advanced check on every ALB reconcile, which needs a `shield` VPC endpoint. Shield Standard stays on. |
 | aws-load-balancer-controller.enableServiceMutatorWebhook | bool | `false` | Disables the webhook that mutates `Service` resources of type `LoadBalancer`. |
 | aws-load-balancer-controller.serviceMonitor | object | `{"enabled":true}` | Enables the Prometheus `ServiceMonitor`. |
 
