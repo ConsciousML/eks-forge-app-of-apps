@@ -104,7 +104,7 @@ Check that Sloth generated the rules of every SLO, replacing `<namespace>` with 
 kubectl get prometheusservicelevels -n <namespace>
 ```
 
-`DESIRED SLOs` and `READY SLOs` should show the same number, and `GEN OK` should show `true`. Sloth has then written a `PrometheusRule` of the same name, next to your `PrometheusServiceLevel`:
+`DESIRED SLOs` and `READY SLOs` should show the same number, and `GEN OK` should show `true`. Sloth then wrote a `PrometheusRule` of the same name, next to your `PrometheusServiceLevel`:
 ```bash
 kubectl get prometheusrules -n <namespace>
 ```
@@ -128,4 +128,4 @@ To see your page alert reach Slack and PagerDuty, follow [Get Your First Page](/
 
 Then open a pull request and merge it, as in [Open a Pull Request](/docs/applications/add-edit-or-remove-an-app/#open-a-pull-request).
 
-To ship your SLOs to `staging` and `prod`, see [Release a Change to Production](/docs/deployment/release-a-change-to-production/). Paging is on in `prod`, so from then on your page alerts page the person on call there.
+To ship your SLOs to `staging` and `prod`, see [Release a Change to Production](/docs/deployment/release-a-change-to-production/). Paging is on in `prod`, so its page alerts page the person on call from then on.
