@@ -2,7 +2,7 @@
 
 # `sloth` Helm Chart Reference
 
-The [`sloth` chart](./) deploys the [Sloth](https://sloth.dev/) controller via the upstream `sloth` chart. The controller turns each `PrometheusServiceLevel` in the cluster into a `PrometheusRule` in the same namespace, holding the SLI recording rules, one per window, and the multi-window multi-burn-rate page and ticket alerts. [Values](#values) lists only what this chart sets. For every other key, read the upstream [`values.yaml`](https://github.com/slok/sloth/blob/main/deploy/kubernetes/helm/sloth/values.yaml).
+The [`sloth` chart](./) deploys the [Sloth](https://sloth.dev/) controller via the upstream `sloth` chart. The controller turns each `PrometheusServiceLevel` in the cluster into a `PrometheusRule` in the same namespace, holding the SLI recording rules, one per window, and the [multi-window multi-burn-rate page and ticket alerts](/docs/monitoring/paging/how-slo-alerting-works/#multi-window-multi-burn-rate-alerts). [Values](#values) lists only what this chart sets. For every other key, read the upstream [`values.yaml`](https://github.com/slok/sloth/blob/main/deploy/kubernetes/helm/sloth/values.yaml).
 
 Each app ships its own `PrometheusServiceLevel` next to its manifests (e.g. [`manifests/podinfo/podinfo-slo.yaml`](../../../manifests/podinfo/podinfo-slo.yaml)). The CRD is installed by [`crds-sloth`](../../../manifests/crds/sloth/), not by this chart.
 
@@ -13,7 +13,7 @@ Each app ships its own `PrometheusServiceLevel` next to its manifests (e.g. [`ma
 
 ## Alerts
 
-Every SLO sets `component: slo` on its alerts. Page alerts carry `severity: critical`, and ticket alerts carry `severity: warning`. Alertmanager routes them to `#<environment>-slo-critical` and `#<environment>-slo-warning`. While a page alert fires, Alertmanager inhibits the ticket alert of the same SLO, since both share an `alertname`.
+Every SLO sets `component: slo` on its alerts. Page alerts carry `severity: critical`, and ticket alerts carry `severity: warning`. Alertmanager routes them to `#<environment>-slo-critical` and `#<environment>-slo-warning`. While a page alert fires, Alertmanager inhibits the ticket alert of the same SLO, since both share an `alertname`. For how these alerts work, see [How SLO Alerting Works](/docs/monitoring/paging/how-slo-alerting-works/).
 
 | Alert | Burn rate | Long window | Short window |
 |-------|-----------|-------------|--------------|

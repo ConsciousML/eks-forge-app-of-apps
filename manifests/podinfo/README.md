@@ -10,7 +10,7 @@ The [`podinfo` manifests](./) deploy [stefanprodan/podinfo](https://github.com/s
 - **[podinfo-svc.yaml](podinfo-svc.yaml)**: `ClusterIP` service, fronts the deployment
 - **[podinfo-network-policy.yaml](podinfo-network-policy.yaml)**: `CiliumNetworkPolicy`, ingress from the ALB, kubelet probes, and Prometheus
 - **[podinfo-servicemonitor.yaml](podinfo-servicemonitor.yaml)**: tells `kube-prometheus-stack` to scrape `/metrics`
-- **[podinfo-slo.yaml](podinfo-slo.yaml)**: Sloth `PrometheusServiceLevel`, availability (non-5xx) and latency (100ms or less) SLOs at 99% over 30 days. Its burn-rate alerts carry `component: slo`, see the [`sloth` Helm Chart](/docs/reference/helm_charts/monitoring/sloth/) reference
+- **[podinfo-slo.yaml](podinfo-slo.yaml)**: Sloth `PrometheusServiceLevel`, availability (non-5xx) and latency (100ms or less) [SLOs](/docs/monitoring/paging/how-slo-alerting-works/#podinfos-slos) at 99% over 30 days. Its burn-rate alerts carry `component: slo`, see the [`sloth` Helm Chart](/docs/reference/helm_charts/monitoring/sloth/) reference
 - **[podinfo-hpa.yaml](podinfo-hpa.yaml)**: `HorizontalPodAutoscaler` on CPU, the load-testing demo target
 - **[k6-loadtest-cronjob.yaml](k6-loadtest-cronjob.yaml)**: suspended `CronJob`, triggers a k6 run on demand
 - **[k6-loadtest-script.yaml](k6-loadtest-script.yaml)**: `ConfigMap` holding the k6 script the CronJob runs
