@@ -5,7 +5,7 @@ import TabItem from '@theme/TabItem';
 
 # How to Silence or Disable a Noisy Alert
 
-This guide shows you how to stop an alert from posting to Slack, either temporarily with a [silence](https://prometheus.io/docs/alerting/latest/alertmanager/#silences) in [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/), or permanently by disabling its rule. You need it when an alert keeps firing and there's nothing for you to fix.
+This guide shows you how to stop an alert from posting to Slack (or paging PagerDuty, for an SLO page alert), either temporarily with a [silence](https://prometheus.io/docs/alerting/latest/alertmanager/#silences) in [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/), or permanently by disabling its rule. You need it when an alert keeps firing and there's nothing for you to fix.
 
 Pick the one that fits your alert:
 - **Silence**: the alert is right, but you can't act on it now (e.g. during a maintenance, or an incident you're already fixing). A silence expires on its own, and changes nothing in your forks.
@@ -30,7 +30,9 @@ Then set:
 
 Click **Preview Alerts** to list the alerts your silence mutes, then **Create**.
 
-The alert keeps firing in Prometheus: only its Slack messages stop. If it still fires when the silence expires, its messages resume.
+The alert keeps firing in Prometheus: only its notifications stop. If it still fires when the silence expires, they resume.
+
+A silence mutes every receiver of the alert, so a silenced SLO page alert stops paging PagerDuty too. The page and the ticket alerts of an SLO share their `alertname`, so `alertname` alone mutes both. To mute only one, keep the `severity` matcher as well.
 
 To remove a silence before its duration ends, click **Silences** in the top menu, find yours, then click **Expire** and **Confirm**.
 
@@ -49,12 +51,18 @@ From the root of your app of apps fork, search for the rule of your alert, repla
 grep -rn "alert: <alert>" charts manifests
 ```
 
+If the `component` label of your alert is `slo`, Sloth generates its rule from an SLO, so search for the `name` of its `alerting` block instead:
+```bash
+grep -rn "name: <alert>" charts manifests
+```
+
 ### Disable the Rule
 
 Pick the tab that fits the result:
 - **Default rule**: no match, and the `component` label of your alert is `k8s` or `prometheus-stack`. The rule ships with the upstream `kube-prometheus-stack` chart.
 - **Standalone rule**: a match under `charts/monitoring/prometheus-rules/`.
 - **Upstream chart**: a match in the `values.yaml` of another chart, or no match and another `component` (e.g. `loki`). The rule comes from a chart that wraps an upstream chart as a dependency.
+- **SLO alert**: a match in a `PrometheusServiceLevel`, with `component: slo`.
 
 <Tabs groupId="rule-source">
 <TabItem value="default" label="Default rule">
@@ -101,6 +109,21 @@ loki:
 ```
 
 </TabItem>
+<TabItem value="slo" label="SLO alert">
+
+In the `PrometheusServiceLevel` the search printed, set `disable: true` under the `pageAlert` or the `ticketAlert` of the SLO, with a comment saying why. Sloth then stops generating that alert. For example, to keep only the ticket alert:
+```yaml
+      alerting:
+        name: <alert>
+        ...
+        pageAlert:
+          # <why this SLO shouldn't page>
+          disable: true
+```
+
+Disabling the page alert stops the SLO from paging (see [Turn Paging On or Off for an SLO](/docs/monitoring/paging/add-an-slo-and-page-alert/#turn-paging-on-or-off-for-an-slo)). To drop both alerts and the SLO itself, delete its entry under `spec.slos`.
+
+</TabItem>
 </Tabs>
 
 If the alert is only wrong in one environment (e.g. a `dev` cluster too small for it), set the key in the `values-<environment>.yaml` of that environment instead of `values.yaml`, by following [Configure an App per Environment](/docs/applications/configure-an-app-per-environment/). This only works for a key of a chart's values, not for a standalone rule.
@@ -113,7 +136,7 @@ Deploy your change to `dev` by following [Test in Dev](/docs/applications/add-ed
 
 Prometheus is only reachable over Tailscale too. Open `https://prometheus.private.dev.<base_domain>` in your browser, replacing `<base_domain>` with your base domain. In the top menu, click **Alerts**, and type the name of your alert in the search bar. It should no longer be listed. A removed rule can take a minute to disappear.
 
-If it's still listed, check the spelling of its name, which is case-sensitive, and that your key is nested under the dependency's `name`.
+If it's still listed, check the spelling of its name, which is case-sensitive, and that your key is nested under the dependency's `name`. For an SLO alert, check that `disable` sits under `pageAlert` or `ticketAlert`, not directly under `alerting`.
 
 Then open a pull request and merge it, as in [Open a Pull Request](/docs/applications/add-edit-or-remove-an-app/#open-a-pull-request).
 
