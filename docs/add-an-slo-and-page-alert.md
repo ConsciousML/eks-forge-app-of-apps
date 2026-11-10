@@ -6,6 +6,15 @@ This guide shows you how to add service level objectives (SLOs) to your app with
 
 For the concepts behind SLO alerts, see [How SLO Alerting Works](/docs/monitoring/paging/how-slo-alerting-works/). If you've never been paged, follow [Get Your First Page](/docs/monitoring/get-started/paging/) first.
 
+## Turn Paging On in Dev
+
+`dev` never pages by default. To test your page alert later, add [`PAGERDUTY_ENABLED`](/docs/reference/environment_variable/#pagerduty_enabled) to the `.env` file of your catalog fork:
+```bash
+export PAGERDUTY_ENABLED=true
+```
+
+Then re-apply the `argocd_app_of_apps` unit, as in [Sync Dev from Your Branch](/docs/applications/add-edit-or-remove-an-app/#sync-dev-from-your-branch). If you're pointing `dev` at your branch now, one apply does both.
+
 ## Write the SLOs
 
 Add a `<name>-slo.yaml` file next to your app's files: in `manifests/<name>/` for plain manifests, or in `templates/` for a Helm chart. It holds one `PrometheusServiceLevel`, with one entry per SLO under `slos`:
@@ -36,8 +45,6 @@ Replace:
 - `<error-query>`: a [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) query that returns the rate of bad events.
 - `<total-query>`: a query that returns the rate of all events.
 
-For more information, see the [`PrometheusServiceLevel` spec](https://github.com/slok/sloth/blob/main/pkg/kubernetes/api/sloth/v1/README.md).
-
 You fill in `alerting` in [Set the Alerts](#set-the-alerts).
 
 Write the range of both queries as `[{{.window}}]`: Sloth replaces it with each window its alerts need. For how to write the queries, see [Querying Prometheus](https://prometheus.io/docs/prometheus/latest/querying/basics/), and [Histograms and Summaries](https://prometheus.io/docs/practices/histograms/) for a latency SLO. For what to measure, see [What to Measure Using SLIs](https://sre.google/workbook/implementing-slos/#what-to-measure-using-slis) in the SRE workbook.
@@ -61,6 +68,8 @@ spec:
       ...
 ```
 
+For more information, see the [`PrometheusServiceLevel` spec](https://github.com/slok/sloth/blob/main/pkg/kubernetes/api/sloth/v1/README.md).
+
 ## Set the Alerts
 
 Under each SLO, add an `alerting` block. Set:
@@ -69,8 +78,6 @@ Under each SLO, add an `alerting` block. Set:
 - `pageAlert.labels.severity`: `critical`. The page alert posts to `#<environment>-slo-critical`, and also pages PagerDuty where paging is on (see [Paging Is Opt-In per Environment](/docs/monitoring/paging/how-paging-works/#paging-is-opt-in-per-environment)).
 - `ticketAlert.labels.severity`: `warning`. The ticket alert only posts to `#<environment>-slo-warning`. Nothing opens a ticket: someone reviews the channel during working hours, and files one by hand if needed.
 - `annotations`: a `summary` and a `description`, which make the body of the Slack message. The `summary` is also the title of the PagerDuty incident, often read alone on a lock screen, so name your app and what's failing (see [Incidents Open and Close Themselves](/docs/monitoring/paging/how-paging-works/#incidents-open-and-close-themselves)).
-
-For more information, see the [`PrometheusServiceLevel` spec](https://github.com/slok/sloth/blob/main/pkg/kubernetes/api/sloth/v1/README.md).
 
 For example, the `alerting` block of podinfo's availability SLO:
 ```yaml
@@ -88,6 +95,8 @@ For example, the `alerting` block of podinfo's availability SLO:
           labels:
             severity: warning
 ```
+
+For more information, see the [`PrometheusServiceLevel` spec](https://github.com/slok/sloth/blob/main/pkg/kubernetes/api/sloth/v1/README.md).
 
 ## Turn Paging On or Off for an SLO
 
@@ -134,8 +143,16 @@ Check that your SLOs show in Grafana too. Open `https://grafana.private.dev.<bas
 
 Both read Sloth's recording rules, so they only show data once your app has served requests.
 
-To see your page alert reach Slack and PagerDuty, follow [Get Your First Page](/docs/monitoring/get-started/paging/), making your own app fail instead of podinfo and searching for your alert.
+## Check the Page
 
-Then open a pull request and merge it, as in [Open a Pull Request](/docs/applications/add-edit-or-remove-an-app/#open-a-pull-request).
+To see your page alert reach Slack and PagerDuty, make your app fail the way your SLO counts as bad, fast enough to burn its error budget: requests that fail for an availability SLO, or that are slow for a latency SLO. For example, [Make Podinfo Fail](/docs/monitoring/get-started/paging/#make-podinfo-fail) sends podinfo requests to `/status/500` for two minutes.
+
+Within a few minutes, your page alert should fire in Prometheus, post to `#dev-slo-critical`, and page you, as in [Watch the Alert Fire](/docs/monitoring/get-started/paging/#watch-the-alert-fire) and [Get Paged](/docs/monitoring/get-started/paging/#get-paged). If it never fires, run your `errorQuery` in Prometheus with a fixed range like `[5m]`, and check that it returns the failures you send.
+
+Then stop the failure, and turn paging off in `dev`: remove the `PAGERDUTY_ENABLED` line from your `.env` file, run `unset PAGERDUTY_ENABLED`, and re-apply the `argocd_app_of_apps` unit again. If the incident is still open in PagerDuty, resolve it by hand, as in [Turn Paging Off](/docs/monitoring/get-started/paging/#turn-paging-off).
+
+## Open a Pull Request and Merge
+
+Follow [Open a Pull Request](/docs/applications/add-edit-or-remove-an-app/#open-a-pull-request) and [Merge](/docs/applications/add-edit-or-remove-an-app/#merge).
 
 To ship your SLOs to `staging` and `prod`, see [Release a Change to Production](/docs/deployment/release-a-change-to-production/). Paging is on in `prod`, so its page alerts page the person on call from then on.
