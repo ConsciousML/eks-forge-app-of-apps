@@ -8,16 +8,39 @@ For the concepts behind SLO alerts, see [How SLO Alerting Works](/docs/monitorin
 
 ## Write the SLOs
 
-Add a `PrometheusServiceLevel` in a `<name>-slo.yaml` file next to your app's files: in `manifests/<name>/` for plain manifests, or in `templates/` for a Helm chart. Set `metadata.name` and `spec.service` to the name of your app.
+Add a `<name>-slo.yaml` file next to your app's files: in `manifests/<name>/` for plain manifests, or in `templates/` for a Helm chart. It holds one `PrometheusServiceLevel`, with one entry per SLO under `slos`:
+```yaml
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusServiceLevel
+metadata:
+  name: <name>
+spec:
+  service: <name>
+  slos:
+    - name: <slo>
+      objective: <objective>
+      description: "<description>"
+      sli:
+        events:
+          errorQuery: <error-query>
+          totalQuery: <total-query>
+      alerting:
+        ...
+```
 
-Then add one entry under `spec.slos` per SLO. Set:
-- `name`: the name of the SLO (e.g. `requests-availability`), unique within your app.
-- `objective`: the share of events that must succeed over 30 days, in percent (e.g. `99`).
-- `description`: what the SLO promises, in one sentence.
-- `sli.events.errorQuery`: a [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) query that returns the rate of bad events.
-- `sli.events.totalQuery`: a query that returns the rate of all events.
+Replace:
+- `<name>`: the name of your app.
+- `<slo>`: the name of the SLO (e.g. `requests-availability`), unique within your app.
+- `<objective>`: the share of events that must succeed over 30 days, in percent (e.g. `99`).
+- `<description>`: what the SLO promises, in one sentence.
+- `<error-query>`: a [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) query that returns the rate of bad events.
+- `<total-query>`: a query that returns the rate of all events.
 
-First, run both queries in Prometheus with a fixed range like `[5m]`, as in [Explore Your Metrics](/docs/monitoring/get-started/metrics/), and check that each returns one series. Then write their range as `[{{.window}}]`: Sloth replaces it with each window its alerts need.
+For more information, see the [`PrometheusServiceLevel` spec](https://github.com/slok/sloth/blob/main/pkg/kubernetes/api/sloth/v1/README.md).
+
+You fill in `alerting` in [Set the Alerts](#set-the-alerts).
+
+Write the range of both queries as `[{{.window}}]`: Sloth replaces it with each window its alerts need. For how to write the queries, see [Querying Prometheus](https://prometheus.io/docs/prometheus/latest/querying/basics/), and [Histograms and Summaries](https://prometheus.io/docs/practices/histograms/) for a latency SLO. For what to measure, see [What to Measure Using SLIs](https://sre.google/workbook/implementing-slos/#what-to-measure-using-slis) in the SRE workbook.
 
 For example, podinfo's availability SLO, in [`manifests/podinfo/podinfo-slo.yaml`](../manifests/podinfo/podinfo-slo.yaml), counts the requests that fail with a `5xx`:
 ```yaml
@@ -38,21 +61,6 @@ spec:
       ...
 ```
 
-Leave out the requests of probes and scrapes in both queries, like the `path!~"healthz|readyz|metrics"` matcher above. They're always fast and succeed, so they inflate the total and hide real failures.
-
-For a latency SLO, count the slow requests as all requests minus those of the histogram bucket at your threshold. For example, podinfo's latency SLO counts the requests over 100ms, with the `le="0.1"` bucket:
-```yaml
-          errorQuery: |
-            sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[{{.window}}]))
-            -
-            sum(rate(http_request_duration_seconds_bucket{namespace="podinfo", path!~"healthz|readyz|metrics", le="0.1"}[{{.window}}]))
-```
-
-The threshold must be one of the bucket boundaries of your histogram. Otherwise, the bucket matches no series, the error query returns nothing, and the SLO never alerts. List the boundaries with this query, replacing `<metric>` and `<namespace>`:
-```promql
-count by (le) (<metric>_bucket{namespace="<namespace>"})
-```
-
 ## Set the Alerts
 
 Under each SLO, add an `alerting` block. Set:
@@ -61,6 +69,8 @@ Under each SLO, add an `alerting` block. Set:
 - `pageAlert.labels.severity`: `critical`. The page alert posts to `#<environment>-slo-critical`, and also pages PagerDuty where paging is on (see [Paging Is Opt-In per Environment](/docs/monitoring/paging/how-paging-works/#paging-is-opt-in-per-environment)).
 - `ticketAlert.labels.severity`: `warning`. The ticket alert only posts to `#<environment>-slo-warning`. Nothing opens a ticket: someone reviews the channel during working hours, and files one by hand if needed.
 - `annotations`: a `summary` and a `description`, which make the body of the Slack message. The `summary` is also the title of the PagerDuty incident, often read alone on a lock screen, so name your app and what's failing (see [Incidents Open and Close Themselves](/docs/monitoring/paging/how-paging-works/#incidents-open-and-close-themselves)).
+
+For more information, see the [`PrometheusServiceLevel` spec](https://github.com/slok/sloth/blob/main/pkg/kubernetes/api/sloth/v1/README.md).
 
 For example, the `alerting` block of podinfo's availability SLO:
 ```yaml
