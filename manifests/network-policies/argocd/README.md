@@ -2,7 +2,7 @@
 
 # `argocd-network-policies` Manifests Reference
 
-The [`argocd-network-policies` manifests](./) define the `CiliumNetworkPolicy` rules for ArgoCD's own components. `argocd` is in [`default-deny.yaml`](../cluster-wide/default-deny.yaml)'s namespace list, so these rules are enforced.
+The [`argocd-network-policies` manifests](./) define the `CiliumNetworkPolicy` rules for ArgoCD's own components. `argocd` is selected by [`default-deny.yaml`](../cluster-wide/default-deny.yaml), like every namespace, so these rules are enforced.
 
 For how `CiliumNetworkPolicy` enforcement works, and why these policies live here, see [How Network Policies Work](/docs/security/how-network-policies-work/#avoiding-a-lockout).
 

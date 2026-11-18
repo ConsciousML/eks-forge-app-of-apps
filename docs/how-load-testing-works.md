@@ -72,4 +72,4 @@ The HPA also scales down faster than the default. Kubernetes waits for several m
 ## Network Policies
 podinfo's namespace denies all traffic by default, so k6's requests are dropped unless both ends allow them (see [Why Both Ends Need a Rule](/docs/security/how-network-policies-work/#why-both-ends-need-a-rule)). k6 has its own policy, [`manifests/podinfo/k6-loadtest-network-policy.yaml`](../manifests/podinfo/k6-loadtest-network-policy.yaml), which allows egress to podinfo. And [`manifests/podinfo/podinfo-network-policy.yaml`](../manifests/podinfo/podinfo-network-policy.yaml) allows ingress from k6.
 
-k6 also resolves the `Service` name. It runs in the app's namespace, which [`kube-dns-egress.yaml`](../manifests/network-policies/cluster-wide/kube-dns-egress.yaml) already lists, so it needs no DNS rule of its own.
+k6 also resolves the `Service` name. It runs in the app's namespace, which carries the label [`kube-dns-egress.yaml`](../manifests/network-policies/cluster-wide/kube-dns-egress.yaml) selects, so it needs no DNS rule of its own.

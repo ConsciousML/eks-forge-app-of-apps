@@ -7,6 +7,7 @@ The [`namespaces` manifests](./) define one `Namespace` per file, named after th
 ## What's Inside
 
 - **[*.yaml](./)**: each file sets the [Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/) `enforce`, `warn`, and `audit` labels. Namespaces running privileged pods use `privileged` for all three. The rest enforce `baseline`, and warn and audit at `restricted`
+- **`network-policy.eks-forge.io/<policy>: "true"`**: opts the namespace into the [cluster-wide network policy](../network-policies/cluster-wide/) of the same name
 
 ## Pod Security Admission Defaults
 
