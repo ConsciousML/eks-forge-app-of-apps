@@ -14,7 +14,7 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 - **[placeholder-values.yaml](placeholder-values.yaml)**: used only by `scripts/validate-helm.sh`, so standalone `helm template` and kubeconform pass
 - **[values-dev.yaml](values-dev.yaml)** and **[values-staging.yaml](values-staging.yaml)**: delete the Prometheus and Alertmanager PVCs on StatefulSet delete, retain them on scale-down
 - **[values-prod.yaml](values-prod.yaml)**: retains the Prometheus and Alertmanager PVCs on StatefulSet delete and scale-down
-- **[`secret-sync/grafana-secrets-values.yaml`](../../external-secrets-operator/secret-sync/grafana-secrets-values.yaml)**: loaded by this app via `extraValueFiles` in [`apps/values.yaml`](../../../apps/values.yaml), sets `grafana.admin.existingSecret` and `passwordKey` to the `Secret` that `grafana-secrets` syncs
+- **[`secret-sync/grafana-secrets-values.yaml`](../../external-secrets-operator/secret-sync/grafana-secrets-values.yaml)**: loaded by this app via `extraValueFiles` in [`apps/core/values.yaml`](../../../apps/core/values.yaml), sets `grafana.admin.existingSecret` and `passwordKey` to the `Secret` that `grafana-secrets` syncs
 
 ## Values
 
@@ -22,7 +22,7 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| kube-prometheus-stack.fullnameOverride | string | `""` | Names this chart's own resources. Must match `tool.helm.releaseName` in `apps/values.yaml`. Injected by the catalog via `appParams`. |
+| kube-prometheus-stack.fullnameOverride | string | `""` | Names this chart's own resources. Must match `tool.helm.releaseName` in `apps/core/values.yaml`. Injected by the catalog via `appParams`. |
 | kube-prometheus-stack.environment | string | `""` | Environment name, prefixes each Slack channel in `alertmanager.config`. Injected by the catalog via `appParams`. |
 | kube-prometheus-stack.pagerduty.enabled | bool | `nil` | Routes `slo` page alerts to PagerDuty on top of Slack. Injected by the catalog via `appParams`. |
 | kube-prometheus-stack.pagerduty.eventsUrl | string | `""` | Events API v2 endpoint of the PagerDuty account's region. Injected by the catalog via `appParams`. |
@@ -69,7 +69,7 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 
 ## Resource Names
 
-`fullnameOverride` only names this chart's own resources: the `prometheus`, `alertmanager`, and operator objects. Grafana, `kube-state-metrics`, and `node-exporter` are bundled subcharts that derive their resource names from the Helm release name instead. Anything referencing those names, like an [`httproute`](../../gateway-api/httproute) `backendRef`, must match `tool.helm.releaseName` in `apps/values.yaml`, or it silently points at the wrong Service.
+`fullnameOverride` only names this chart's own resources: the `prometheus`, `alertmanager`, and operator objects. Grafana, `kube-state-metrics`, and `node-exporter` are bundled subcharts that derive their resource names from the Helm release name instead. Anything referencing those names, like an [`httproute`](../../gateway-api/httproute) `backendRef`, must match `tool.helm.releaseName` in `apps/core/values.yaml`, or it silently points at the wrong Service.
 
 ## Upstream Dependencies
 

@@ -24,9 +24,11 @@ PLAIN_MANIFEST_IGNORE_PATTERNS=(
   '(^|/)templates/'
 )
 
-# Prints each Helm chart's directory, one per line.
+# Prints each Helm chart's directory, one per line. Skips library charts, which `helm template`
+# refuses to render. The root charts that depend on one render it instead.
 find_helm_charts() {
-  find "$REPO_ROOT" -name Chart.yaml -not -path '*/.git/*' -exec dirname {} \;
+  find "$REPO_ROOT" -name Chart.yaml -not -path '*/.git/*' -exec grep -L '^type: library' {} + |
+    xargs -n1 dirname
 }
 
 # Prints every plain-manifest YAML file, one per line.

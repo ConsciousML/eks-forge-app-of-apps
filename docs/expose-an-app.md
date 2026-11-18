@@ -72,7 +72,7 @@ annotations:
 
 ### Declare the Route Entry
 
-Add an `<app>-httproute` entry under `applications` in [`apps/values.yaml`](../apps/values.yaml), with:
+Add an `<app>-httproute` entry under `applications` in [`apps/core/values.yaml`](../apps/core/values.yaml), with:
 - `path`: the `httproute` chart.
 - `destination.namespace`: your app's namespace. The `HTTPRoute` can only reach a `Service` in its own namespace.
 - `syncWave`: after both your gateway, at wave `6`, and your app (see [Set the Sync Wave](/docs/applications/add-edit-or-remove-an-app/#set-the-sync-wave)).
@@ -119,7 +119,7 @@ For example, Goldilocks' route runs after `goldilocks` (wave `8`), at wave `9`:
 
 ### Allow the Key in the Apps Chart
 
-The catalog injects `host` through [`appParams`](/docs/applications/how-the-app-of-apps-works/#appparams-injection). Allow your `<app>-httproute` key in the apps chart, by following [Allow the Key in the Apps Chart](/docs/applications/pass-terraform-values-to-an-app/#allow-the-key-in-the-apps-chart). For example, podinfo's key in [`apps/values.schema.json`](../apps/values.schema.json):
+The catalog injects `host` through [`appParams`](/docs/applications/how-the-app-of-apps-works/#appparams-injection). Allow your `<app>-httproute` key in the apps chart, by following [Allow the Key in the Apps Chart](/docs/applications/pass-terraform-values-to-an-app/#allow-the-key-in-the-apps-chart). For example, podinfo's key in [`apps/core/values.schema.json`](../apps/core/values.schema.json):
 ```json
 "appParams": {
   "type": "object",
@@ -131,7 +131,7 @@ The catalog injects `host` through [`appParams`](/docs/applications/how-the-app-
 }
 ```
 
-Then add its placeholder, by following [Add Placeholders to the Apps Chart](/docs/applications/pass-terraform-values-to-an-app/#add-placeholders-to-the-apps-chart). For example, podinfo's placeholder in [`apps/placeholder-values.yaml`](../apps/placeholder-values.yaml):
+Then add its placeholder, by following [Add Placeholders to the Apps Chart](/docs/applications/pass-terraform-values-to-an-app/#add-placeholders-to-the-apps-chart). For example, podinfo's placeholder in [`apps/core/placeholder-values.yaml`](../apps/core/placeholder-values.yaml):
 ```yaml
 appParams:
   podinfo-httproute:

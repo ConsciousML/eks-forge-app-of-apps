@@ -1,9 +1,9 @@
 ---
 name: wave-sync-order-app-of-apps
-description: Assign or recompute the syncWave for an entry in apps/values.yaml. Use when adding a new app-of-apps entry, or when a dependency changes and downstream waves need recomputing.
+description: Assign or recompute the syncWave for an entry in apps/core/values.yaml. Use when adding a new app-of-apps entry, or when a dependency changes and downstream waves need recomputing.
 ---
 
-`apps/values.yaml`'s `syncWave` field controls the order ArgoCD creates/syncs child
+`apps/core/values.yaml`'s `syncWave` field controls the order ArgoCD creates/syncs child
 `Application` resources in. Waves are not chosen by feel, derive them mechanically from the
 dependency graph.
 

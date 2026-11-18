@@ -35,7 +35,7 @@ data:
 
 ### Declare the Secret Entry
 
-Add a `<app>-secrets` entry under `applications` in [`apps/values.yaml`](../apps/values.yaml), with:
+Add a `<app>-secrets` entry under `applications` in [`apps/core/values.yaml`](../apps/core/values.yaml), with:
 - `path`: the `secret-sync` chart.
 - `destination.namespace`: your app's namespace.
 - `syncWave`: `5`, since it depends on `external-secrets-operator`, at wave `4` (see [Set the Sync Wave](/docs/applications/add-edit-or-remove-an-app/#set-the-sync-wave)).
@@ -56,7 +56,7 @@ For example, Alertmanager's entry:
 
 ### Allow the Key in the Apps Chart
 
-The catalog injects the rest of the `secret-sync` values, `secretStoreName`, `awsRegion`, and `remoteKey`, through [`appParams`](/docs/applications/how-the-app-of-apps-works/#appparams-injection). Allow your `<app>-secrets` key in the apps chart, by following [Allow the Key in the Apps Chart](/docs/applications/pass-terraform-values-to-an-app/#allow-the-key-in-the-apps-chart). For example, Alertmanager's key in [`apps/values.schema.json`](../apps/values.schema.json):
+The catalog injects the rest of the `secret-sync` values, `secretStoreName`, `awsRegion`, and `remoteKey`, through [`appParams`](/docs/applications/how-the-app-of-apps-works/#appparams-injection). Allow your `<app>-secrets` key in the apps chart, by following [Allow the Key in the Apps Chart](/docs/applications/pass-terraform-values-to-an-app/#allow-the-key-in-the-apps-chart). For example, Alertmanager's key in [`apps/core/values.schema.json`](../apps/core/values.schema.json):
 ```json
 "appParams": {
   "type": "object",
@@ -69,7 +69,7 @@ The catalog injects the rest of the `secret-sync` values, `secretStoreName`, `aw
 }
 ```
 
-Then add its placeholders, by following [Add Placeholders to the Apps Chart](/docs/applications/pass-terraform-values-to-an-app/#add-placeholders-to-the-apps-chart). For example, Alertmanager's placeholders in [`apps/placeholder-values.yaml`](../apps/placeholder-values.yaml):
+Then add its placeholders, by following [Add Placeholders to the Apps Chart](/docs/applications/pass-terraform-values-to-an-app/#add-placeholders-to-the-apps-chart). For example, Alertmanager's placeholders in [`apps/core/placeholder-values.yaml`](../apps/core/placeholder-values.yaml):
 ```yaml
 appParams:
   ...
@@ -92,7 +92,7 @@ kube-prometheus-stack:
         - alertmanager-slack-bot
 ```
 
-If your app needs the `Secret` before it starts (e.g. to mount it or to set a password on first boot), add `<app>-secrets` to its `# Depends on:` comment in [`apps/values.yaml`](../apps/values.yaml), and recompute its `syncWave` (see [Set the Sync Wave](/docs/applications/add-edit-or-remove-an-app/#set-the-sync-wave)). For example, `kube-prometheus-stack` runs after `alertmanager-secrets` (wave `5`), at wave `6`:
+If your app needs the `Secret` before it starts (e.g. to mount it or to set a password on first boot), add `<app>-secrets` to its `# Depends on:` comment in [`apps/core/values.yaml`](../apps/core/values.yaml), and recompute its `syncWave` (see [Set the Sync Wave](/docs/applications/add-edit-or-remove-an-app/#set-the-sync-wave)). For example, `kube-prometheus-stack` runs after `alertmanager-secrets` (wave `5`), at wave `6`:
 ```yaml
   # Depends on:
   # - alertmanager-secrets (Alertmanager mounts it via alertmanagerSpec.secrets, so it must

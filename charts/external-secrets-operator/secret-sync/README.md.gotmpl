@@ -2,7 +2,7 @@
 
 # `secret-sync` Helm Chart Reference
 
-The [`secret-sync` chart](./) renders a generic `SecretStore` (backed by AWS Secrets Manager) plus an `ExternalSecret` that syncs specific keys from one AWS secret into a Kubernetes `Secret`. Each `*-secrets-values.yaml` file in this directory is one instance, loaded via `extraValueFiles` in [`apps/values.yaml`](../../../apps/values.yaml).
+The [`secret-sync` chart](./) renders a generic `SecretStore` (backed by AWS Secrets Manager) plus an `ExternalSecret` that syncs specific keys from one AWS secret into a Kubernetes `Secret`. Each `*-secrets-values.yaml` file in this directory is one instance, loaded via `extraValueFiles` in [`apps/core/values.yaml`](../../../apps/core/values.yaml).
 
 For setup steps, read [How to Pass a Secret to an App](/docs/applications/pass-a-secret-to-an-app/).
 
