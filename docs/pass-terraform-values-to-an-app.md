@@ -137,7 +137,7 @@ aws-load-balancer-controller:
 
 ### Allow the Key in the Apps Chart
 
-If your app has no `appParams` key yet, add one under `appParams` in [`apps/values.schema.json`](../apps/values.schema.json), which rejects any key it doesn't list (see [`appParams` Injection](/docs/applications/how-the-app-of-apps-works/#appparams-injection)). Name it after the app's `name` in [`apps/values.yaml`](../apps/values.yaml), not its `path`. For example, for the Tailscale connector and the AWS Load Balancer Controller:
+If your app has no `appParams` key yet, add one under `appParams` in [`apps/core/values.schema.json`](../apps/core/values.schema.json), which rejects any key it doesn't list (see [`appParams` Injection](/docs/applications/how-the-app-of-apps-works/#appparams-injection)). Name it after the app's `name` in [`apps/core/values.yaml`](../apps/core/values.yaml), not its `path`. For example, for the Tailscale connector and the AWS Load Balancer Controller:
 ```json
 "appParams": {
   "type": "object",
@@ -154,7 +154,7 @@ If your app has no `appParams` key yet, add one under `appParams` in [`apps/valu
 
 ### Add Placeholders to the Apps Chart
 
-Add your placeholders under your app's key in [`apps/placeholder-values.yaml`](../apps/placeholder-values.yaml), so CI can render the apps chart without the catalog, as it does your chart.
+Add your placeholders under your app's key in [`apps/core/placeholder-values.yaml`](../apps/core/placeholder-values.yaml), so CI can render the apps chart without the catalog, as it does your chart.
 
 <Tabs groupId="chart-type">
 <TabItem value="own" label="Own chart">

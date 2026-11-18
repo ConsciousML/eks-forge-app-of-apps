@@ -2,7 +2,7 @@
 
 # `gateway` Helm Chart Reference
 
-The [`gateway` chart](./) renders a Gateway API `Gateway` backed by an ALB, in two instances: `gateway-public` (internet-facing) and `gateway-private` (internal). Each `*-gateway-values.yaml` file in this directory is one instance, loaded via `extraValueFiles` in [`apps/values.yaml`](../../../apps/values.yaml).
+The [`gateway` chart](./) renders a Gateway API `Gateway` backed by an ALB, in two instances: `gateway-public` (internet-facing) and `gateway-private` (internal). Each `*-gateway-values.yaml` file in this directory is one instance, loaded via `extraValueFiles` in [`apps/core/values.yaml`](../../../apps/core/values.yaml).
 
 For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 
@@ -39,7 +39,7 @@ For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 
 ## Sync Waves
 
-Each template sets its own `argocd.argoproj.io/sync-wave`, ordering the resources within one Application. The `syncWave` on the `gateway-public` and `gateway-private` entries in `apps/values.yaml` is separate. It orders this Application against the others.
+Each template sets its own `argocd.argoproj.io/sync-wave`, ordering the resources within one Application. The `syncWave` on the `gateway-public` and `gateway-private` entries in `apps/core/values.yaml` is separate. It orders this Application against the others.
 
 ## Upstream Dependencies
 

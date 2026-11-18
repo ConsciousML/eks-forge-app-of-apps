@@ -1,3 +1,4 @@
+{{- define "app-of-apps.applications" -}}
 {{- range .Values.applications }}
 {{- $config := $.Values.config -}}
 apiVersion: argoproj.io/v1alpha1
@@ -81,3 +82,4 @@ spec:
       selfHeal: true
 ---
 {{ end -}}
+{{- end }}

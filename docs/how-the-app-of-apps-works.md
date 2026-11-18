@@ -24,16 +24,16 @@ Here's how EKS Forge applies this pattern in the app of apps repository.
 ```mermaid
 flowchart LR
     unit["Catalog unit<br/>argocd_app_of_apps"] -->|creates| root["Root Application<br/>app-of-apps"]
-    root -->|renders apps/| podinfo["Application<br/>podinfo"]
-    root -->|renders apps/| lbc["Application<br/>aws-lbc"]
-    root -->|renders apps/| more["..."]
+    root -->|renders apps/core/| podinfo["Application<br/>podinfo"]
+    root -->|renders apps/core/| lbc["Application<br/>aws-lbc"]
+    root -->|renders apps/core/| more["..."]
     podinfo -->|deploys manifests/podinfo| res1["Deployment, Service, ..."]
     lbc -->|deploys charts/aws-lbc| res2["Deployment, Service, ..."]
 ```
 
-Terraform creates the root Application, `app-of-apps`, with the rest of the cluster. It points at the [`apps/`](../apps/) Helm chart, which renders one child Application per entry under `applications` in [`apps/values.yaml`](../apps/values.yaml). Each child then deploys the manifests or chart at its entry's `path`.
+Terraform creates the root Application, `app-of-apps`, with the rest of the cluster. It points at the [`apps/core/`](../apps/core/) root chart, which renders, through the [`app-of-apps`](../charts/app-of-apps/) library chart, one child Application per entry under `applications` in [`apps/core/values.yaml`](../apps/core/values.yaml). Each child then deploys the manifests or chart at its entry's `path`.
 
-From then on, ArgoCD deploys every application from the app of apps repository. Adding an application is one entry in `apps/values.yaml`, with no Terraform change unless the application needs AWS resources or a value from a Terraform module.
+From then on, ArgoCD deploys every application from the app of apps repository. Adding an application is one entry in `apps/core/values.yaml`, with no Terraform change unless the application needs AWS resources or a value from a Terraform module.
 
 A child Application is an entry, not a directory. Several entries can share one chart with different values: every `*-httproute` entry deploys [`charts/gateway-api/httproute`](../charts/gateway-api/httproute/), each with its own values file.
 
@@ -58,7 +58,7 @@ flowchart LR
     params -->|key| k3["aws-lbc"] -->|values| v3["vpcEndpointCidrs"] --> c3["Application<br/>aws-lbc"]
 ```
 
-The [`argocd_app_of_apps` unit](https://github.com/ConsciousML/eks-forge-catalog/blob/main/units/eks/addons/argocd/app_of_apps/terragrunt.hcl) sets `appParams` as a Helm value on the root Application. For each entry in `apps/values.yaml`, [`apps/templates/applications.yaml`](../apps/templates/applications.yaml) looks up `appParams.<name>` and passes it to the child as its Helm values.
+The [`argocd_app_of_apps` unit](https://github.com/ConsciousML/eks-forge-catalog/blob/main/units/eks/addons/argocd/app_of_apps/terragrunt.hcl) sets `appParams` as a Helm value on the root Application. For each entry in `apps/core/values.yaml`, [`charts/app-of-apps/templates/_applications.tpl`](../charts/app-of-apps/templates/_applications.tpl) looks up `appParams.<name>` and passes it to the child as its Helm values.
 
 `appParams` is a map. Each key is an Application's `name`, and it maps to the Helm values that Application receives. For example, the catalog gives `podinfo-httproute` its hostname:
 ```hcl
@@ -70,7 +70,7 @@ appParams = {
 }
 ```
 
-Keying by `name` instead of `path` lets two Applications sharing a chart get different values. [`apps/values.schema.json`](../apps/values.schema.json) lists every allowed key, so a typo fails loudly instead of injecting values that nothing reads.
+Keying by `name` instead of `path` lets two Applications sharing a chart get different values. [`apps/core/values.schema.json`](../apps/core/values.schema.json) lists every allowed key, so a typo fails loudly instead of injecting values that nothing reads.
 
 Only values from the catalog belong in `appParams`: ones that come from an AWS resource or differ per deployment, like a certificate ARN, a hostname, or a secret name. Everything static stays a default in the app of apps repository, versioned with the chart that reads it.
 
@@ -91,7 +91,7 @@ The same app of apps repository deploys the applications of `dev`, `staging`, an
 
 The catalog injects `global.environment` into the root Application, and `applications.yaml` renders each `extraValueFiles` entry with it. In `prod`, `loki` loads [`values-prod.yaml`](../charts/monitoring/loki/values-prod.yaml), which keeps its storage volumes when Loki is deleted or scaled down. `values-dev.yaml` and `values-staging.yaml` delete them instead, to save costs.
 
-An overlay holds only the keys that differ, so the shared config lives once in `values.yaml` instead of being copied per environment. And since [`apps/values.schema.json`](../apps/values.schema.json) requires a non-empty `global.environment`, a missing environment fails loudly instead of silently loading a nonexistent `values-.yaml`.
+An overlay holds only the keys that differ, so the shared config lives once in `values.yaml` instead of being copied per environment. And since [`apps/core/values.schema.json`](../apps/core/values.schema.json) requires a non-empty `global.environment`, a missing environment fails loudly instead of silently loading a nonexistent `values-.yaml`.
 
 To add overlays to your app, see [Configure an App per Environment](/docs/applications/configure-an-app-per-environment/).
 
@@ -105,7 +105,7 @@ flowchart LR
     gw["gateway-public"] --> route
 ```
 
-Each entry in `apps/values.yaml` has a `syncWave` number that encodes this order.
+Each entry in `apps/core/values.yaml` has a `syncWave` number that encodes this order.
 
 The root Application syncs its children one [sync wave](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/) at a time, lowest number first. It only starts the next wave once every Application in the current one is healthy.
 
@@ -116,10 +116,10 @@ Some dependencies don't show up in any manifest. Several Applications ship a [Da
 
 When a pod can't fit on the existing nodes, [Karpenter](https://karpenter.sh/) launches a new one, sized for that pod plus the DaemonSets it already knows about. If an application syncs before a DaemonSet exists, Karpenter can launch a node with no room left for it. The DaemonSet's pod then stays `Pending`, until its priority class evicts another pod to make room.
 
-So every Application that runs pods is held to wave `3` or later, even without a real dependency on the DaemonSets. The `DaemonSets Priority` comment in [`apps/values.yaml`](../apps/values.yaml) marks the entries this rule applies to.
+So every Application that runs pods is held to wave `3` or later, even without a real dependency on the DaemonSets. The `DaemonSets Priority` comment in [`apps/core/values.yaml`](../apps/core/values.yaml) marks the entries this rule applies to.
 
 ## Namespaces
-[`apps/templates/applications.yaml`](../apps/templates/applications.yaml) sets `CreateNamespace=false` on every child Application, so none of them can create its own namespace. Instead, the `namespaces` Application creates them all from [`manifests/namespaces`](../manifests/namespaces/), each with its [Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/) labels.
+[`charts/app-of-apps/templates/_applications.tpl`](../charts/app-of-apps/templates/_applications.tpl) sets `CreateNamespace=false` on every child Application, so none of them can create its own namespace. Instead, the `namespaces` Application creates them all from [`manifests/namespaces`](../manifests/namespaces/), each with its [Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/) labels.
 
 This way, no application can end up in a namespace without those labels. An application whose namespace is missing from `manifests/namespaces` fails to sync instead.
 

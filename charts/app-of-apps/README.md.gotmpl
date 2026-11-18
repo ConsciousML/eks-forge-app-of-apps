@@ -1,38 +1,39 @@
 <!-- This doc is aggregated into the EKS Forge documentation site: https://eks-forge.readthedocs.io/latest/docs/reference/helm_charts/app-of-apps/. It is not meant to be read directly in this repository. -->
 
-# `apps` Helm Chart Reference
+# `app-of-apps` Helm Chart Reference
 
-The [`apps` chart](./) implements the [App of Apps pattern](https://argo-cd.readthedocs.io/en/latest/operator-manual/cluster-bootstrapping/#app-of-apps-pattern-alternative). It renders one ArgoCD `Application` per entry under `applications`.
+The [`app-of-apps` library chart](./) holds the template of every root chart under [`apps/`](../../apps/), which implements the [App of Apps pattern](https://argo-cd.readthedocs.io/en/latest/operator-manual/cluster-bootstrapping/#app-of-apps-pattern-alternative). It renders one ArgoCD `Application` per entry under the root chart's `applications`.
 
 For setup steps, read [How to Add, Edit, or Remove an App](/docs/applications/add-edit-or-remove-an-app/) and [Configure an App per Environment](/docs/applications/configure-an-app-per-environment/).
 
 ## What's Inside
 
-- **[templates/applications.yaml](templates/applications.yaml)**: one `Application` per `applications` entry
-- **[values.yaml](values.yaml)**: every application entry, with its dependency chain in comments, see [Values](#values)
-- **[values.schema.json](values.schema.json)**: rejects an empty `config.spec.source.repoURL` or `global.environment`
-- **[placeholder-values.yaml](placeholder-values.yaml)**: used only by `scripts/validate-helm.sh`, so standalone `helm template` and kubeconform pass
+- **[templates/_applications.tpl](templates/_applications.tpl)**: the `app-of-apps.applications` template, one `Application` per `applications` entry
 
-{{ template "chart.valuesSection" . }}
+## Usage
+
+A root chart declares this chart as a `file://` dependency in its `Chart.yaml`, as [`apps/core/Chart.yaml`](../../apps/core/Chart.yaml) does. Its template then includes `app-of-apps.applications` with the root context:
+
+```yaml
+{{ "{{" }} include "app-of-apps.applications" . }}
+```
+
+The template reads `config`, `global.environment`, `appParams`, and `applications` from the root chart's values. Each root chart validates its own `appParams` keys in its `values.schema.json`.
 
 ## Values Schema
 
-Each entry under `applications` accepts:
+Each entry under a root chart's `applications` accepts:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | applications[].name | string | none | Required. The `Application` name and, unless `path` is set, the source path in this repository. |
 | applications[].path | string | `name` | Source path, when it differs from `name`. Used when multiple applications share a chart, like the `charts/gateway-api/httproute` instances. |
 | applications[].destination.namespace | string | `name` | Target namespace. |
-| applications[].syncWave | int | unset | Sets the `argocd.argoproj.io/sync-wave` annotation, controlling apply order relative to other applications. See the comments in `values.yaml` for the current dependency chain. |
+| applications[].syncWave | int | unset | Sets the `argocd.argoproj.io/sync-wave` annotation, controlling apply order relative to other applications. See the comments in `apps/core/values.yaml` for the current dependency chain. |
 | applications[].extraValueFiles | list | `[]` | Paths to additional Helm values files, loaded through a second `source` entry referenced via `$values`. Each entry is rendered with `tpl`, so it can reference `.Values.global.environment` to pick a per-environment overlay, like `loki`'s `values-{{ "{{" }} .Values.global.environment }}.yaml`. Also used to share values between a chart instance and a related one, like `kube-prometheus-stack` pulling in `secret-sync`'s Grafana secret name. |
-| applications[].tool.helm.releaseName | string | unset | Pins the Helm release name. Several instances rely on this to match a Pod Identity association's expected `ServiceAccount` name or a catalog-side Terraform local. See the comments beside each entry in `values.yaml` for specifics. |
+| applications[].tool.helm.releaseName | string | unset | Pins the Helm release name. Several instances rely on this to match a Pod Identity association's expected `ServiceAccount` name or a catalog-side Terraform local. See the comments beside each entry in `apps/core/values.yaml` for specifics. |
 | applications[].syncOptions | list | `[]` | Extra entries appended to `syncPolicy.syncOptions`, alongside the default `CreateNamespace=false`. |
 | applications[].preventCascadeDelete | bool | `false` | When `true`, drops the cascade-delete finalizer and sets `automated.prune: false`, so this app can never delete a resource it manages. Only set for apps owning cluster-scoped resources like `Namespace`, where deleting the app must not delete everything inside them. |
 | applications[].finalizers | list | `[]` | Extra finalizers appended alongside the default `resources-finalizer.argocd.argoproj.io`. |
 | applications[].project | string | `"default"` | ArgoCD project. |
 | applications[].namespace | string | `"argocd"` | Namespace of the `Application` itself. |
-
-## Upstream Dependencies
-
-- **[`argocd_app_of_apps` module](https://github.com/ConsciousML/eks-forge-catalog/tree/main/modules/argocd_app_of_apps)** (catalog): provisions the root `Application` that points at this chart and sets `appParams`

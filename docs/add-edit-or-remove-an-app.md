@@ -93,7 +93,7 @@ Add a `nodeSelector` and `tolerations` to the app's pods by following [Schedule 
 
 ### Declare the Application
 
-Add an entry under `applications` in [`apps/values.yaml`](../apps/values.yaml), with the app's `name`, the `path` of its files, its `destination.namespace`, and its `syncWave` (see [Set the Sync Wave](#set-the-sync-wave)). For example, podinfo's entry:
+Add an entry under `applications` in [`apps/core/values.yaml`](../apps/core/values.yaml), with the app's `name`, the `path` of its files, its `destination.namespace`, and its `syncWave` (see [Set the Sync Wave](#set-the-sync-wave)). For example, podinfo's entry:
 ```yaml
   - name: podinfo
     path: manifests/podinfo
@@ -102,7 +102,7 @@ Add an entry under `applications` in [`apps/values.yaml`](../apps/values.yaml), 
     syncWave: 4
 ```
 
-For the other fields, such as `tool.helm.releaseName` or `syncOptions`, see the [`apps` Helm Chart](/docs/reference/helm_charts/app-of-apps/) reference.
+For the other fields, such as `tool.helm.releaseName` or `syncOptions`, see the [`app-of-apps` Helm Chart](/docs/reference/helm_charts/app-of-apps/) reference.
 
 ### Set the Sync Wave
 
@@ -135,16 +135,16 @@ Depending on what your app needs, also follow:
 
 ## Edit an App
 
-Change the app's files, or its entry in [`apps/values.yaml`](../apps/values.yaml). For a change that needs one of the [Extra Steps](#extra-steps), follow its guide.
+Change the app's files, or its entry in [`apps/core/values.yaml`](../apps/core/values.yaml). For a change that needs one of the [Extra Steps](#extra-steps), follow its guide.
 If the app's dependencies change, update its `# Depends on:` comment and recompute its `syncWave` (see [Set the Sync Wave](#set-the-sync-wave)). Then recompute the `syncWave` of every entry that depends on it, since a shifted wave cascades downstream.
 
 ## Remove an App
 
 Delete:
 - The app's directory under `manifests/` or `charts/`. Skip it if another entry shares it (e.g. `charts/gateway-api/httproute`), and delete only the app's own values file instead.
-- The app's entry in [`apps/values.yaml`](../apps/values.yaml). Drop it from the `# Depends on:` comment of every entry that listed it, and recompute their `syncWave` (see [Set the Sync Wave](#set-the-sync-wave)).
+- The app's entry in [`apps/core/values.yaml`](../apps/core/values.yaml). Drop it from the `# Depends on:` comment of every entry that listed it, and recompute their `syncWave` (see [Set the Sync Wave](#set-the-sync-wave)).
 - The app's namespace from [`manifests/namespaces/`](../manifests/namespaces/), if no other app runs in it.
-- The app's key in [`apps/values.schema.json`](../apps/values.schema.json) and under `appParams` in [`apps/placeholder-values.yaml`](../apps/placeholder-values.yaml), if it receives [Terraform values](/docs/applications/pass-terraform-values-to-an-app/). Also delete its entry under `appParams` in the catalog's [`argocd_app_of_apps` unit](https://github.com/ConsciousML/eks-forge-catalog/blob/main/units/eks/addons/argocd/app_of_apps/terragrunt.hcl).
+- The app's key in [`apps/core/values.schema.json`](../apps/core/values.schema.json) and under `appParams` in [`apps/core/placeholder-values.yaml`](../apps/core/placeholder-values.yaml), if it receives [Terraform values](/docs/applications/pass-terraform-values-to-an-app/). Also delete its entry under `appParams` in the catalog's [`argocd_app_of_apps` unit](https://github.com/ConsciousML/eks-forge-catalog/blob/main/units/eks/addons/argocd/app_of_apps/terragrunt.hcl).
 - Any other reference to the app in the catalog's `argocd_app_of_apps` unit, such as its hostname in `locals` or its target under the `blackbox-exporter` entry of `appParams`.
 
 ## Test in Dev
@@ -206,7 +206,7 @@ When every job is green, merge from the root of your app of apps fork:
 gh pr merge --merge
 ```
 
-If you also opened a pull request in your catalog fork, merge it the same way from its root, in this order, since [`apps/values.schema.json`](../apps/values.schema.json) rejects any `appParams` key it doesn't list:
+If you also opened a pull request in your catalog fork, merge it the same way from its root, in this order, since [`apps/core/values.schema.json`](../apps/core/values.schema.json) rejects any `appParams` key it doesn't list:
 - **You added an `appParams` key**: merge the app of apps pull request first, then the catalog one.
 - **You removed an `appParams` key**: merge the catalog pull request first, then the app of apps one.
 

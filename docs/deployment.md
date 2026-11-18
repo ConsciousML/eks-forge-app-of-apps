@@ -24,7 +24,7 @@ Connect to Tailscale and open the ArgoCD UI in your browser, as in the [Log In t
 ## Explore the App of Apps
 The home page shows one tile per ArgoCD [Application](https://argo-cd.readthedocs.io/en/stable/core_concepts/). Type `app-of-apps` in the search bar to find its tile.
 
-Click on it. The tree shows every other Application downstream of `app-of-apps`. Each one is an entry under `applications` in [`apps/values.yaml`](../apps/values.yaml) of your fork. Open this file and find the `podinfo` entry:
+Click on it. The tree shows every other Application downstream of `app-of-apps`. Each one is an entry under `applications` in [`apps/core/values.yaml`](../apps/core/values.yaml) of your fork. Open this file and find the `podinfo` entry:
 ```yaml
   - name: podinfo
     path: manifests/podinfo

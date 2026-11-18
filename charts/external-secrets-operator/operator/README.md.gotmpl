@@ -8,7 +8,7 @@ For setup steps, read [How to Pass a Secret to an App](/docs/applications/pass-a
 
 ## What's Inside
 
-- **[Chart.yaml](Chart.yaml)**: vendors the upstream chart. See its entry in [`apps/values.yaml`](../../../apps/values.yaml) for the `tool.helm.releaseName` pin
+- **[Chart.yaml](Chart.yaml)**: vendors the upstream chart. See its entry in [`apps/core/values.yaml`](../../../apps/core/values.yaml) for the `tool.helm.releaseName` pin
 - **[templates/network-policy-controller.yaml](templates/network-policy-controller.yaml)**, **[templates/network-policy-webhook.yaml](templates/network-policy-webhook.yaml)**, and **[templates/network-policy-cert-controller.yaml](templates/network-policy-cert-controller.yaml)**: one `CiliumNetworkPolicy` per controller. The controller's egress to the Secrets Manager API is scoped via `toCIDR` to `vpcEndpointCidrs.secretsmanager`, not `toEntities: world`
 - **[values.yaml](values.yaml)**: see [Values](#values)
 - **[values.schema.json](values.schema.json)**: rejects the values the catalog injects via `appParams` when empty, so a missing injection fails the render

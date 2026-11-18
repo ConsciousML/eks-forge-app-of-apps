@@ -1,7 +1,7 @@
 kube-prometheus-stack:
   # fullnameOverride also composes the httproute backendRef names, Helm and YAML can't do
   # that string interpolation themselves.
-  # -- Names this chart's own resources. Must match `tool.helm.releaseName` in `apps/values.yaml`. Injected by the catalog via `appParams`.
+  # -- Names this chart's own resources. Must match `tool.helm.releaseName` in `apps/core/values.yaml`. Injected by the catalog via `appParams`.
   # @section -- Release
   fullnameOverride: ""
   # -- Environment name, prefixes each Slack channel in `alertmanager.config`. Injected by the catalog via `appParams`.

@@ -40,7 +40,7 @@ Add all three files, even when an environment keeps the defaults. ArgoCD fails t
 
 ## Load the Overlays
 
-Under your app's entry in [`apps/values.yaml`](../apps/values.yaml), add your overlay to `extraValueFiles`, with `{{ .Values.global.environment }}` in place of the environment's name. The catalog sets it to the environment being deployed. For example, Loki's entry:
+Under your app's entry in [`apps/core/values.yaml`](../apps/core/values.yaml), add your overlay to `extraValueFiles`, with `{{ .Values.global.environment }}` in place of the environment's name. The catalog sets it to the environment being deployed. For example, Loki's entry:
 ```yaml
   - name: loki
     path: charts/monitoring/loki

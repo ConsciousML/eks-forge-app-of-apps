@@ -173,7 +173,7 @@ Then, from the root of your app of apps fork, find its file:
 grep -rln "name: <policy>" charts manifests
 ```
 
-If no file matches, the policy is named after its Helm release (`{{ .Release.Name }}`). Find the entry with that `name` in [`apps/values.yaml`](../apps/values.yaml), and open the policy under its `path`.
+If no file matches, the policy is named after its Helm release (`{{ .Release.Name }}`). Find the entry with that `name` in [`apps/core/values.yaml`](../apps/core/values.yaml), and open the policy under its `path`.
 
 </TabItem>
 </Tabs>

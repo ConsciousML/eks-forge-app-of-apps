@@ -1,0 +1,5 @@
+apiVersion: v2
+name: app-of-apps
+description: Shared template rendering one ArgoCD Application per applications entry, for every root chart under apps/
+type: library
+version: 0.1.0

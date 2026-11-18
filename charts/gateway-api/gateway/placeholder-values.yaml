@@ -1,6 +1,6 @@
 # Used only by scripts/validate-helm.sh so standalone `helm template` and
 # kubeconform pass. Real values come from public-gateway-values.yaml or
-# private-gateway-values.yaml via apps/values.yaml's extraValueFiles.
+# private-gateway-values.yaml via apps/core/values.yaml's extraValueFiles.
 gateway:
   name: "placeholder"
   namespace: "placeholder"
