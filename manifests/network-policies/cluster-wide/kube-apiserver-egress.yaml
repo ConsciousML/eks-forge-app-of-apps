@@ -3,22 +3,11 @@ kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: kube-apiserver-egress
 spec:
+  # Opt-in label set in manifests/namespaces/. Never on argocd and kube-system, which keep their
+  # own copies to avoid a lockout if this Application fails to sync.
   endpointSelector:
-    matchExpressions:
-      - key: io.kubernetes.pod.namespace
-        operator: In
-        # add a namespace name here to opt it in
-        # argocd and kube-system excluded: each has its own copy (network-policies/argocd/,
-        # network-policies/kube-system/), to avoid depending on this Application syncing for
-        # their own network access (lockout risk)
-        values:
-          - vpa
-          - goldilocks
-          - external-secrets
-          - external-dns
-          - tailscale
-          - loki
-          - monitoring
+    matchLabels:
+      io.cilium.k8s.namespace.labels.network-policy.eks-forge.io/kube-apiserver-egress: "true"
   egress:
     - toEntities:
         - kube-apiserver

@@ -459,9 +459,8 @@ applications:
 
   # --- Network Policies ---
   # Depends on:
-  # - argocd-network-policies, network-policies-kube-system (default-deny.yaml,
-  #   kube-apiserver-egress.yaml, and kube-dns-egress.yaml list argocd and kube-system,
-  #   so those rules only work once the workload allow-policies already exist)
+  # - argocd-network-policies, network-policies-kube-system (default-deny.yaml selects
+  #   argocd and kube-system, so it only works once their allow-policies already exist)
   - name: network-policies-cluster-wide
     path: manifests/network-policies/cluster-wide
     destination:

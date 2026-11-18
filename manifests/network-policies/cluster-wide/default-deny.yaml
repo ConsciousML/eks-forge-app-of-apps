@@ -3,27 +3,11 @@ kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: default-deny
 spec:
+  # Every pod in every namespace. Never {}, which also selects reserved identities such as health.
   endpointSelector:
     matchExpressions:
       - key: io.kubernetes.pod.namespace
-        operator: In
-        # add a namespace name here to opt it in
-        values:
-          - argocd
-          - cilium-secrets
-          - default
-          - external-dns
-          - external-secrets
-          - gateway
-          - goldilocks
-          - kube-node-lease
-          - kube-system
-          - kube-public
-          - loki
-          - monitoring
-          - podinfo
-          - tailscale
-          - vpa
+        operator: Exists
   enableDefaultDeny:
     ingress: true
     egress: true

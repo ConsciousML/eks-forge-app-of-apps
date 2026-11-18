@@ -3,16 +3,11 @@ kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: eks-pod-identity-egress
 spec:
+  # Opt-in label set in manifests/namespaces/. Never on argocd and kube-system, which keep their
+  # own copies to avoid a lockout if this Application fails to sync.
   endpointSelector:
-    matchExpressions:
-      - key: io.kubernetes.pod.namespace
-        operator: In
-        # add a namespace name here to opt it in
-        values:
-          - external-secrets
-          - external-dns
-          - loki
-          - kube-system
+    matchLabels:
+      io.cilium.k8s.namespace.labels.network-policy.eks-forge.io/eks-pod-identity-egress: "true"
   egress:
     # EKS Pod Identity credential endpoint, documented at
     # https://docs.aws.amazon.com/eks/latest/userguide/pod-id-how-it-works.html

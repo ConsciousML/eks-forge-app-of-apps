@@ -11,24 +11,11 @@ If you're new to Cilium network policies, read [How Network Policies Work](/docs
 
 ## Deny All Ingress and Egress in Your Namespace
 
-If your namespace is already in [`default-deny.yaml`](../manifests/network-policies/cluster-wide/default-deny.yaml), skip to [Find Dropped Traffic](#find-dropped-traffic).
-
-Otherwise, add it to the `values` list. For example, podinfo's namespace:
-```yaml
-spec:
-  endpointSelector:
-    matchExpressions:
-      - key: io.kubernetes.pod.namespace
-        operator: In
-        values:
-          ...
-          - podinfo
-          ...
-```
+[`default-deny.yaml`](../manifests/network-policies/cluster-wide/default-deny.yaml) already denies all ingress and egress in every namespace, so there's nothing to add. Skip to [Find Dropped Traffic](#find-dropped-traffic).
 
 ## Deploy the App
 
-Deploy your app to `dev`, along with its namespace in `default-deny.yaml`, by following [Test in Dev](/docs/applications/add-edit-or-remove-an-app/#test-in-dev), up to the sync.
+Deploy your app to `dev`, along with its namespace, by following [Test in Dev](/docs/applications/add-edit-or-remove-an-app/#test-in-dev), up to the sync.
 
 ## Find Dropped Traffic
 
@@ -72,9 +59,9 @@ For **Both pods**, write both rules at once. Otherwise, Hubble only shows the se
 
 | Peer | Rules on | Egress, in the source | Ingress, in the destination | Example |
 |------|----------|-----------------------|-----------------------------|---------|
-| CoreDNS, resolving DNS | Your namespace, cluster-wide | Your namespace in `values` | N/A, CoreDNS allows the whole cluster | [`kube-dns-egress.yaml`](../manifests/network-policies/cluster-wide/kube-dns-egress.yaml) |
-| The Kubernetes API | Your namespace, cluster-wide | Your namespace in `values` | N/A | [`kube-apiserver-egress.yaml`](../manifests/network-policies/cluster-wide/kube-apiserver-egress.yaml) |
-| The EKS Pod Identity agent | Your namespace, cluster-wide | Your namespace in `values` | N/A | [`eks-pod-identity-egress.yaml`](../manifests/network-policies/cluster-wide/eks-pod-identity-egress.yaml) |
+| CoreDNS, resolving DNS | Your namespace, cluster-wide | The policy's label on your namespace | N/A, CoreDNS allows the whole cluster | [`kube-dns-egress.yaml`](../manifests/network-policies/cluster-wide/kube-dns-egress.yaml) |
+| The Kubernetes API | Your namespace, cluster-wide | The policy's label on your namespace | N/A | [`kube-apiserver-egress.yaml`](../manifests/network-policies/cluster-wide/kube-apiserver-egress.yaml) |
+| The EKS Pod Identity agent | Your namespace, cluster-wide | The policy's label on your namespace | N/A | [`eks-pod-identity-egress.yaml`](../manifests/network-policies/cluster-wide/eks-pod-identity-egress.yaml) |
 | A pod in the same namespace | Both pods | [`toEndpoints`](https://docs.cilium.io/en/stable/security/policy/layer3/#endpoints-based) on its labels | `fromEndpoints` on its labels | [`k6-loadtest-network-policy.yaml`](../manifests/podinfo/k6-loadtest-network-policy.yaml) |
 | A pod in another namespace | Both pods | Same, plus `io.kubernetes.pod.namespace` | Same, plus `io.kubernetes.pod.namespace` | [`network-policy-results-cache.yaml`](../charts/monitoring/loki/templates/network-policy-results-cache.yaml) |
 | The kubelet, probing your pod | Your pod | N/A | [`fromEntities: [host]`](https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based) | [`podinfo-network-policy.yaml`](../manifests/podinfo/podinfo-network-policy.yaml) |
@@ -97,16 +84,13 @@ Pick the tab that matches the **Rules on** column:
 <Tabs groupId="policy-scope">
 <TabItem value="namespaces" label="Cluster-wide">
 
-Add your namespace to the `values` list of the file in [`manifests/network-policies/cluster-wide/`](../manifests/network-policies/cluster-wide/) that allows the flow, as in [Deny All Ingress and Egress in Your Namespace](#deny-all-ingress-and-egress-in-your-namespace). For example, if your app resolves DNS names, like podinfo, add its namespace to [`kube-dns-egress.yaml`](../manifests/network-policies/cluster-wide/kube-dns-egress.yaml):
+Add the label of the file in [`manifests/network-policies/cluster-wide/`](../manifests/network-policies/cluster-wide/) that allows the flow to your namespace in [`manifests/namespaces/`](../manifests/namespaces/). Each file selects the namespaces carrying `network-policy.eks-forge.io/<file name>: "true"`. For example, if your app resolves DNS names, like podinfo, add the label of [`kube-dns-egress.yaml`](../manifests/network-policies/cluster-wide/kube-dns-egress.yaml) to [`manifests/namespaces/podinfo.yaml`](../manifests/namespaces/podinfo.yaml):
 ```yaml
-spec:
-  endpointSelector:
-    matchExpressions:
-      - key: io.kubernetes.pod.namespace
-        operator: In
-        values:
-          ...
-          - podinfo
+metadata:
+  name: podinfo
+  labels:
+    ...
+    network-policy.eks-forge.io/kube-dns-egress: "true"
 ```
 
 If several namespaces need the same rule and no file allows it, add a new `CiliumClusterwideNetworkPolicy` there, one per concern, selecting namespaces the same way (see Cilium's [CiliumClusterwideNetworkPolicy](https://docs.cilium.io/en/stable/network/kubernetes/policy/#ciliumclusterwidenetworkpolicy)). For example, [`kube-apiserver-egress.yaml`](../manifests/network-policies/cluster-wide/kube-apiserver-egress.yaml):
@@ -117,13 +101,8 @@ metadata:
   name: kube-apiserver-egress
 spec:
   endpointSelector:
-    matchExpressions:
-      - key: io.kubernetes.pod.namespace
-        operator: In
-        values:
-          - vpa
-          - goldilocks
-          ...
+    matchLabels:
+      io.cilium.k8s.namespace.labels.network-policy.eks-forge.io/kube-apiserver-egress: "true"
   egress:
     - toEntities:
         - kube-apiserver

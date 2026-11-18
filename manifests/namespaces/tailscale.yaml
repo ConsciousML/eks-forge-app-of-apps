@@ -8,3 +8,5 @@ metadata:
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/warn: privileged
     pod-security.kubernetes.io/audit: privileged
+    network-policy.eks-forge.io/kube-apiserver-egress: "true"
+    network-policy.eks-forge.io/kube-dns-egress: "true"
