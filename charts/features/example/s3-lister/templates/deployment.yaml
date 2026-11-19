@@ -33,7 +33,7 @@ spec:
           image: {{ .Values.image }}
           command: ["/bin/sh", "-c"]
           args:
-            - while true; do aws s3 ls "s3://$BUCKET"; sleep {{ .Values.intervalSeconds }}; done
+            - while true; do aws s3 ls "s3://$BUCKET" && echo "Listed s3://$BUCKET"; sleep {{ .Values.intervalSeconds }}; done
           env:
             - name: BUCKET
               value: {{ .Values.bucket | quote }}
