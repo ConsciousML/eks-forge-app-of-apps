@@ -1,0 +1,14 @@
+# Used only by scripts/validate-helm.sh so standalone `helm template` and
+# kubeconform pass. Real values are injected by the catalog
+# (eks-forge-catalog) via appParams. See units/features/example/app_of_apps
+# in that repo.
+config:
+  spec:
+    source:
+      repoURL: "https://github.com/placeholder/placeholder"
+global:
+  environment: "dev"
+appParams:
+  example-s3-lister:
+    bucket: "placeholder-example"
+    region: "us-east-1"

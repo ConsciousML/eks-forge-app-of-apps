@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3-lister
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: s3-lister
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: s3-lister
+    spec:
+      serviceAccountName: s3-lister
+      nodeSelector:
+        karpenter.sh/nodepool: elastic
+      tolerations:
+        - key: "karpenter.sh/workload-class"
+          operator: "Equal"
+          value: "elastic"
+          effect: "NoSchedule"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: s3-lister
+          image: {{ .Values.image }}
+          command: ["/bin/sh", "-c"]
+          args:
+            # sh as PID 1 ignores SIGTERM without the trap. sleep runs in the background so the trap fires at once.
+            - trap 'exit 0' TERM; while true; do aws s3 ls "s3://$BUCKET" && echo "Listed s3://$BUCKET"; sleep {{ .Values.intervalSeconds }} & wait $!; done
+          env:
+            - name: BUCKET
+              value: {{ .Values.bucket | quote }}
+            - name: AWS_REGION
+              value: {{ .Values.region | quote }}
+            # The root filesystem is read only. The AWS CLI writes its cache under HOME.
+            - name: HOME
+              value: /tmp
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

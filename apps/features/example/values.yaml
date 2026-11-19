@@ -1,0 +1,48 @@
+config:
+  spec:
+    destination:
+      # -- Cluster every child `Application` deploys to.
+      # @section -- Source
+      server: https://kubernetes.default.svc
+    source:
+      # -- This repository's URL, for every child `Application`. Set by the catalog from `github.hcl`. Must not be empty.
+      # @section -- Source
+      repoURL: ""
+      # -- Git revision every child `Application` syncs. Set by the catalog.
+      # @section -- Source
+      targetRevision: main
+
+# -- Values injected per application, keyed by `name`, as the child `Application`'s `spec.source.helm.values`. Set by the catalog's `app_of_apps` unit.
+# @section -- Catalog Inputs
+appParams: {}
+
+# environment has no real default, the catalog sets it (global.environment) when
+# deploying. values.schema.json requires it non-empty, so a bare `helm template` fails
+# loudly instead of silently pointing extraValueFiles at a nonexistent values-.yaml. Use
+# placeholder-values.yaml for local testing.
+global:
+  # -- Deploying environment (`dev`, `staging`, or `prod`), rendered into `extraValueFiles` entries to pick a `values-<env>.yaml` overlay. Set by the catalog. Must not be empty.
+  # @section -- Catalog Inputs
+  environment: ""
+
+# -- One child `Application` per entry. See [Values Schema](#values-schema).
+# @section -- Applications
+# @default -- see values.yaml
+applications:
+  # --- Namespaces ---
+  # No preventCascadeDelete, so removing the feature deletes its namespace.
+  - name: example-namespaces
+    path: manifests/features/example/namespaces
+    destination:
+      namespace: kube-system
+    syncWave: -1
+
+  # --- S3 Lister ---
+  # Depends on:
+  # - example-namespaces
+  # - network-policies-cluster-wide (core)
+  - name: example-s3-lister
+    path: charts/features/example/s3-lister
+    destination:
+      namespace: example
+    syncWave: 0

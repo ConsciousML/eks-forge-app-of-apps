@@ -1,0 +1,13 @@
+# -- Name of the bucket the pod lists. Injected by the catalog via `appParams`.
+# @section -- Catalog Inputs
+bucket: ""
+# -- AWS region of the bucket. Injected by the catalog via `appParams`.
+# @section -- Catalog Inputs
+region: ""
+
+# -- Container image of the pod.
+# @section -- Workload
+image: amazon/aws-cli:2.39.3
+# -- Seconds between two listings.
+# @section -- Workload
+intervalSeconds: 60
