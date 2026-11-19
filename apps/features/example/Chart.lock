@@ -1,0 +1,6 @@
+dependencies:
+- name: app-of-apps
+  repository: file://../../../charts/app-of-apps
+  version: 0.1.0
+digest: sha256:fa8f188de585dcf3ba58258296ea6db33d5eb1b4aad0c1d4c277abe632abac4f
+generated: "2026-11-19T10:14:38.94349-06:00"

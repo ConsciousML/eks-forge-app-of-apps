@@ -1,0 +1,18 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: s3-lister
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: s3-lister
+  egress:
+    # S3 through the VPC's S3 gateway endpoint. A gateway endpoint has no IP to scope a
+    # toCIDR rule to, so Cilium sees it as "world".
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
