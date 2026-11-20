@@ -1,6 +1,6 @@
 apiVersion: v2
-name: example-applications
-description: Applications of the example optional feature
+name: gpu-applications
+description: Applications of the gpu optional feature
 
 # A chart can be either an 'application' or a 'library' chart.
 #

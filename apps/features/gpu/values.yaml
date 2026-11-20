@@ -31,18 +31,27 @@ global:
 applications:
   # --- Namespaces ---
   # No preventCascadeDelete, so removing the feature deletes its namespace.
-  - name: example-namespaces
-    path: manifests/features/example/namespaces
+  - name: gpu-namespaces
+    path: manifests/features/gpu/namespaces
     destination:
       namespace: kube-system
     syncWave: -1
 
-  # --- S3 Lister ---
+  # --- NVIDIA device plugin ---
   # Depends on:
-  # - example-namespaces
-  # - network-policies-cluster-wide (core)
-  - name: example-s3-lister
-    path: charts/features/example/s3-lister
+  # - gpu-namespaces
+  - name: gpu-nvidia-device-plugin
+    path: charts/features/gpu/nvidia-device-plugin
     destination:
-      namespace: example
+      namespace: gpu
+    syncWave: 0
+
+  # --- DCGM exporter ---
+  # Depends on:
+  # - gpu-namespaces
+  # - kube-prometheus-stack (core), for the ServiceMonitor CRD and the dashboard sidecar
+  - name: gpu-dcgm-exporter
+    path: charts/features/gpu/dcgm-exporter
+    destination:
+      namespace: gpu
     syncWave: 0

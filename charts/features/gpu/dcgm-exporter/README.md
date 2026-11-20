@@ -1,0 +1,32 @@
+<!-- This doc is aggregated into the EKS Forge documentation site. It is not meant to be read directly in this repository. -->
+
+# `dcgm-exporter` Helm Chart Reference
+
+The [`dcgm-exporter` chart](./) deploys the [DCGM exporter](https://github.com/NVIDIA/dcgm-exporter) via the upstream `dcgm-exporter` chart, exporting GPU metrics through the upstream `ServiceMonitor`. [Values](#values) lists only what this chart sets. For every other key, read the upstream [`values.yaml`](https://github.com/NVIDIA/dcgm-exporter/blob/main/deployment/values.yaml).
+
+## What's Inside
+
+- **[templates/network-policy.yaml](templates/network-policy.yaml)**: the exporter's `CiliumNetworkPolicy`
+- **[templates/dashboard.yaml](templates/dashboard.yaml)**: a `ConfigMap` holding the **NVIDIA DCGM Exporter Dashboard**, loaded into Grafana's **GPU** folder by its dashboard sidecar
+- **[dashboards/dcgm-exporter.json](dashboards/dcgm-exporter.json)**: the dashboard, from [grafana.com](https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/), with its datasource input set to `Prometheus`
+- **[values.yaml](values.yaml)**: see [Values](#values)
+
+## Values
+
+### Scheduling
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| dcgm-exporter.nodeSelector | object | see values.yaml | Pins the exporter to the `gpu` NodePool, with a matching `tolerations` entry. |
+
+### Exporter
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| dcgm-exporter.podSecurityContext | object | see values.yaml | Pod-level seccomp profile. |
+| dcgm-exporter.securityContext | object | see values.yaml | Container security context, the upstream default with a read-only root filesystem. |
+
+## Upstream Dependencies
+
+- **[`units/features/gpu/node_pool`](https://github.com/ConsciousML/eks-forge-catalog/tree/main/units/features/gpu/node_pool)** (catalog): the `gpu` NodePool and its `karpenter.sh/workload-class=gpu` taint, which `nodeSelector` and `tolerations` must match
+- **[`kube-prometheus-stack`](../../../monitoring/kube-prometheus-stack/)** (core): the `ServiceMonitor` CRD, and the Grafana sidecar watching every namespace for `grafana_dashboard` `ConfigMap`s

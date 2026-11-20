@@ -190,3 +190,35 @@ misconfigurations:
       controller's own PrometheusServiceLevel resources. It grants nothing
       on core or other API groups. Vendored upstream chart, the rule is
       inherent to the controller's function.
+  - id: AVD-KSV-0010
+    paths:
+      - "charts/features/gpu/nvidia-device-plugin/charts/nvidia-device-plugin/templates/daemonset-mps-control-daemon.yml"
+    statement: >
+      MPS control daemon, rendered unconditionally by the upstream chart. It
+      only schedules on nodes labelled nvidia.com/mps.capable=true, which
+      only a device plugin MPS sharing config sets. This cluster sets none,
+      so it never runs. No values option disables it.
+  - id: AVD-KSV-0014
+    paths:
+      - "charts/features/gpu/nvidia-device-plugin/charts/nvidia-device-plugin/templates/daemonset-mps-control-daemon.yml"
+    statement: >
+      MPS control daemon, rendered unconditionally by the upstream chart. It
+      only schedules on nodes labelled nvidia.com/mps.capable=true, which
+      only a device plugin MPS sharing config sets. This cluster sets none,
+      so it never runs. No values option disables it.
+  - id: AVD-KSV-0017
+    paths:
+      - "charts/features/gpu/nvidia-device-plugin/charts/nvidia-device-plugin/templates/daemonset-mps-control-daemon.yml"
+    statement: >
+      MPS control daemon, rendered unconditionally by the upstream chart. It
+      only schedules on nodes labelled nvidia.com/mps.capable=true, which
+      only a device plugin MPS sharing config sets. This cluster sets none,
+      so it never runs. No values option disables it.
+  - id: AVD-KSV-0005
+    paths:
+      - "charts/features/gpu/dcgm-exporter/charts/dcgm-exporter/templates/daemonset.yaml"
+    statement: >
+      SYS_ADMIN is the upstream default, required for DCGM's profiling
+      metrics (DCGM_FI_PROF_*: SM, tensor, and DRAM activity), the only
+      accurate measure of how busy a GPU is. Every other capability is
+      dropped and privilege escalation is disabled.

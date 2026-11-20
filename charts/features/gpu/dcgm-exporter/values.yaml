@@ -1,0 +1,30 @@
+dcgm-exporter:
+  # -- Pins the exporter to the `gpu` NodePool, with a matching `tolerations` entry.
+  # @section -- Scheduling
+  # @default -- see values.yaml
+  nodeSelector:
+    karpenter.sh/nodepool: gpu
+  tolerations:
+    - key: karpenter.sh/workload-class
+      operator: Equal
+      value: gpu
+      effect: NoSchedule
+
+  # Root and SYS_ADMIN are upstream defaults, required for the DCGM_FI_PROF_* profiling metrics.
+  # -- Pod-level seccomp profile.
+  # @section -- Exporter
+  # @default -- see values.yaml
+  podSecurityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  # -- Container security context, the upstream default with a read-only root filesystem.
+  # @section -- Exporter
+  # @default -- see values.yaml
+  securityContext:
+    runAsNonRoot: false
+    runAsUser: 0
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      add: ["SYS_ADMIN"]
+      drop: ["ALL"]

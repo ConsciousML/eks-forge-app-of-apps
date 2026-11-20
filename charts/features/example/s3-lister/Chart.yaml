@@ -1,5 +1,0 @@
-apiVersion: v2
-name: s3-lister
-description: Pod listing the example feature's S3 bucket through Pod Identity
-type: application
-version: 0.1.0

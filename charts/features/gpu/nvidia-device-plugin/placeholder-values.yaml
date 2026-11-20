@@ -1,0 +1,4 @@
+# Used only by scripts/validate-helm.sh so standalone `helm template` passes. ArgoCD renders
+# into the gpu namespace, which the upstream chart's validation requires.
+nvidia-device-plugin:
+  allowDefaultNamespace: true

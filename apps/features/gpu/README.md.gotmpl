@@ -1,0 +1,23 @@
+<!-- This doc is aggregated into the EKS Forge documentation site. It is not meant to be read directly in this repository. -->
+
+# `gpu` Root Chart Reference
+
+The [`gpu` root chart](./) lists the applications of the `gpu` optional feature. It renders one ArgoCD `Application` per entry under `applications`, through the [`app-of-apps` library chart](../../../charts/app-of-apps/). The applications run on the `gpu` NodePool's nodes, which the catalog provisions.
+
+## What's Inside
+
+- **[templates/applications.yaml](templates/applications.yaml)**: includes the library's `app-of-apps.applications` template
+- **[values.yaml](values.yaml)**: every application entry, with its dependency chain in comments, see [Values](#values). Entry fields are in the library's [Values Schema](../../../charts/app-of-apps/#values-schema)
+- **[values.schema.json](values.schema.json)**: rejects an empty `config.spec.source.repoURL` or `global.environment`, and any `appParams` key
+- **[placeholder-values.yaml](placeholder-values.yaml)**: used only by `scripts/validate-helm.sh`, so standalone `helm template` and kubeconform pass
+- **[`gpu-namespaces`](../../../manifests/features/gpu/namespaces/)**: the feature's `gpu` namespace. Removing the feature deletes it
+- **[`gpu-nvidia-device-plugin`](../../../charts/features/gpu/nvidia-device-plugin/)**: advertises `nvidia.com/gpu` on GPU nodes
+- **[`gpu-dcgm-exporter`](../../../charts/features/gpu/dcgm-exporter/)**: exports GPU metrics to Prometheus, with the **GPU** Grafana dashboard
+
+{{ template "chart.valuesSection" . }}
+
+## Upstream Dependencies
+
+- **[`app-of-apps`](../../../charts/app-of-apps/)**: the template this chart renders
+- **[`core`](../../core/)**: the cluster-wide network policies, and `kube-prometheus-stack` for the `ServiceMonitor` CRD and Grafana's dashboard sidecar
+- **[`units/features/gpu`](https://github.com/ConsciousML/eks-forge-catalog/tree/main/units/features/gpu)** (catalog): provisions the `gpu` NodePool and the root `Application` that points at this chart

@@ -1,0 +1,41 @@
+nvidia-device-plugin:
+  # Replaces the upstream affinity, which matches NFD and GFD labels this cluster doesn't run.
+  # -- Pins the plugin to the `gpu` NodePool, with a matching `tolerations` entry.
+  # @section -- Scheduling
+  # @default -- see values.yaml
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: karpenter.sh/nodepool
+                operator: In
+                values: ["gpu"]
+  tolerations:
+    - key: karpenter.sh/workload-class
+      operator: Equal
+      value: gpu
+      effect: NoSchedule
+
+  # -- Resource requests and limits.
+  # @section -- Plugin
+  # @default -- see values.yaml
+  resources:
+    requests: { cpu: 10m, memory: 50Mi }
+    limits: { memory: 50Mi }
+
+  # Root is required to create the plugin socket under the root-owned /var/lib/kubelet/device-plugins.
+  # -- Pod-level seccomp profile.
+  # @section -- Plugin
+  # @default -- see values.yaml
+  podSecurityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  # -- Container security context, read-only root filesystem with every capability dropped.
+  # @section -- Plugin
+  # @default -- see values.yaml
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop: ["ALL"]

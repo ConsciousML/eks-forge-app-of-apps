@@ -1,0 +1,26 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: dcgm-exporter
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: dcgm-exporter
+  ingress:
+    # kubelet startup and liveness probes, sourced from the node.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "9400"
+              protocol: TCP
+    # kube-prometheus-stack scraping /metrics through the chart's ServiceMonitor.
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: prometheus
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "9400"
+              protocol: TCP

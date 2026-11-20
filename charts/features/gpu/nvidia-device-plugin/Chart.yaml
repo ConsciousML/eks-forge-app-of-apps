@@ -1,0 +1,9 @@
+apiVersion: v2
+name: nvidia-device-plugin
+description: NVIDIA device plugin, advertising nvidia.com/gpu on the gpu NodePool's nodes
+type: application
+version: 0.1.0
+dependencies:
+  - name: nvidia-device-plugin
+    version: 0.20.2
+    repository: https://nvidia.github.io/k8s-device-plugin
