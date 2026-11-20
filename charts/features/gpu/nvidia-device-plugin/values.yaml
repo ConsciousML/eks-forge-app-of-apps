@@ -17,12 +17,13 @@ nvidia-device-plugin:
       value: gpu
       effect: NoSchedule
 
+  # Placeholder until a Goldilocks recommendation exists. The upstream chart sets none.
   # -- Resource requests and limits.
   # @section -- Plugin
   # @default -- see values.yaml
   resources:
-    requests: { cpu: 10m, memory: 50Mi }
-    limits: { memory: 50Mi }
+    requests: { cpu: 10m, memory: 64Mi }
+    limits: { memory: 256Mi }
 
   # Root is required to create the plugin socket under the root-owned /var/lib/kubelet/device-plugins.
   # -- Pod-level seccomp profile.
