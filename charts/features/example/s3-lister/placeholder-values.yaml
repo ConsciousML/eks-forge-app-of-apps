@@ -1,3 +1,0 @@
-# Used only by scripts/validate-helm.sh, so standalone `helm template` and kubeconform pass.
-bucket: "placeholder-example"
-region: "us-east-1"

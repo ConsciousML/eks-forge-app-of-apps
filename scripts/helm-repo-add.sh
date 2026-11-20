@@ -22,8 +22,8 @@ if [[ -z "$REPO_URLS" ]]; then
 fi
 
 while IFS= read -r url; do
-  # Derive a stable repo name from the host, since it's only used locally as an alias.
-  name="$(echo "$url" | sed -E 's#^https?://##; s#/.*##; s/[^a-zA-Z0-9]+/-/g')"
+  # Local alias from host and path. Two repos can share a host (e.g. nvidia.github.io).
+  name="$(echo "$url" | sed -E 's#^https?://##; s#/+$##; s/[^a-zA-Z0-9]+/-/g')"
   echo "[INFO] helm repo add $name $url"
   helm repo add "$name" "$url" --force-update
 done <<< "$REPO_URLS"

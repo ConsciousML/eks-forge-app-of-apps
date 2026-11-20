@@ -47,11 +47,7 @@
     "appParams": {
       "type": "object",
       "additionalProperties": false,
-      "properties": {
-        "example-s3-lister": {
-          "type": "object"
-        }
-      }
+      "properties": {}
     }
   }
 }
