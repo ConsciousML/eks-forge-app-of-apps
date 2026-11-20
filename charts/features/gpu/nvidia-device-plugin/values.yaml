@@ -1,6 +1,6 @@
 nvidia-device-plugin:
   # Replaces the upstream affinity, which matches NFD and GFD labels this cluster doesn't run.
-  # -- Pins the plugin to the `gpu` NodePool, with a matching `tolerations` entry.
+  # -- Pins the plugin to the `gpu-node-pool` NodePool, with a matching `tolerations` entry.
   # @section -- Scheduling
   # @default -- see values.yaml
   affinity:
@@ -10,7 +10,7 @@ nvidia-device-plugin:
           - matchExpressions:
               - key: karpenter.sh/nodepool
                 operator: In
-                values: ["gpu"]
+                values: ["gpu-node-pool"]
   tolerations:
     - key: karpenter.sh/workload-class
       operator: Equal

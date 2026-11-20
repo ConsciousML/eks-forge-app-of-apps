@@ -1,9 +1,9 @@
 dcgm-exporter:
-  # -- Pins the exporter to the `gpu` NodePool, with a matching `tolerations` entry.
+  # -- Pins the exporter to the `gpu-node-pool` NodePool, with a matching `tolerations` entry.
   # @section -- Scheduling
   # @default -- see values.yaml
   nodeSelector:
-    karpenter.sh/nodepool: gpu
+    karpenter.sh/nodepool: gpu-node-pool
   tolerations:
     - key: karpenter.sh/workload-class
       operator: Equal

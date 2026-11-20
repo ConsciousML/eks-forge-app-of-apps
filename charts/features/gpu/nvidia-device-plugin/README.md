@@ -19,7 +19,7 @@ The plugin has no network traffic. It talks to the kubelet over a Unix socket, s
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| nvidia-device-plugin.affinity | object | see values.yaml | Pins the plugin to the `gpu` NodePool, with a matching `tolerations` entry. |
+| nvidia-device-plugin.affinity | object | see values.yaml | Pins the plugin to the `gpu-node-pool` NodePool, with a matching `tolerations` entry. |
 
 ### Plugin
 
@@ -31,4 +31,4 @@ The plugin has no network traffic. It talks to the kubelet over a Unix socket, s
 
 ## Upstream Dependencies
 
-- **[`units/features/gpu/node_pool`](https://github.com/ConsciousML/eks-forge-catalog/tree/main/units/features/gpu/node_pool)** (catalog): the `gpu` NodePool and its `karpenter.sh/workload-class=gpu` taint, which `affinity` and `tolerations` must match
+- **[`units/features/gpu/node_pool`](https://github.com/ConsciousML/eks-forge-catalog/tree/main/units/features/gpu/node_pool)** (catalog): the `gpu-node-pool` NodePool and its `karpenter.sh/workload-class=gpu` taint, which `affinity` and `tolerations` must match
