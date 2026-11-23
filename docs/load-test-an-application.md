@@ -270,15 +270,15 @@ spec:
     - type: prometheus
       metadata:
         serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
-        query: sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[2m]))
+        query: sum(rate(http_request_duration_seconds_count{namespace="podinfo"}[2m]))
         threshold: "300"
+        ignoreNullValues: "false"
   ...
 ```
 
 In it:
-- `query` returns the total for all pods. KEDA divides it by the number of replicas and compares the result to `threshold`, the target per pod.
-- `fallback` applies when KEDA can't read the metric (e.g. Prometheus is down) 3 times in a row. `currentReplicasIfHigher` keeps the current replicas, or `replicas` if there are fewer, so the app never scales down while KEDA can't see its load.
-- An empty result (no series yet, e.g. before the first request) reads as `0`, so the app scales down to `minReplicaCount`.
+- `query` returns the total for all pods. KEDA divides it by the number of replicas and compares the result to `threshold`, the target per pod. It keeps the probe and scrape requests, unlike the SLO: they add little next to `threshold`, and they keep the series alive while the app is idle.
+- `fallback` applies when KEDA can't read the metric 3 times in a row: Prometheus is down, or, with `ignoreNullValues: "false"`, the query returns no series (e.g. Prometheus stopped scraping the app). `currentReplicasIfHigher` keeps the current replicas, or `replicas` if there are fewer, so the app never scales down while KEDA can't see its load.
 
 For another trigger, see KEDA's [Scalers](https://keda.sh/docs/latest/scalers/). A trigger on a source other than Prometheus needs a matching egress rule in [`charts/scaling/keda/templates/network-policy-operator.yaml`](../charts/scaling/keda/templates/network-policy-operator.yaml), and AWS sources need permissions (see [Pass Terraform Values to an App](/docs/applications/pass-terraform-values-to-an-app/)).
 

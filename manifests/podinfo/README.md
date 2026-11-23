@@ -11,7 +11,7 @@ The [`podinfo` manifests](./) deploy [stefanprodan/podinfo](https://github.com/s
 - **[podinfo-network-policy.yaml](podinfo-network-policy.yaml)**: `CiliumNetworkPolicy`, ingress from the ALB, kubelet probes, and Prometheus
 - **[podinfo-servicemonitor.yaml](podinfo-servicemonitor.yaml)**: tells `kube-prometheus-stack` to scrape `/metrics`
 - **[podinfo-slo.yaml](podinfo-slo.yaml)**: Sloth `PrometheusServiceLevel`, availability (non-5xx) and latency (100ms or less) [SLOs](/docs/monitoring/paging/how-slo-alerting-works/#podinfos-slos) at 99% over 30 days. Its burn-rate alerts carry `component: slo`, see the [`sloth` Helm Chart](/docs/reference/helm_charts/monitoring/sloth/) reference
-- **[podinfo-scaledobject.yaml](podinfo-scaledobject.yaml)**: KEDA `ScaledObject` on requests per second from Prometheus, the load-testing demo target. While Prometheus is unreadable, the replicas never go down. See the [`keda` Helm Chart](/docs/reference/helm_charts/scaling/keda/) reference
+- **[podinfo-scaledobject.yaml](podinfo-scaledobject.yaml)**: KEDA `ScaledObject` on requests per second from Prometheus, the load-testing demo target. While the metric is unreadable (Prometheus down, or no podinfo series), the replicas never go down. See the [`keda` Helm Chart](/docs/reference/helm_charts/scaling/keda/) reference
 - **[k6-loadtest-cronjob.yaml](k6-loadtest-cronjob.yaml)**: suspended `CronJob`, triggers a k6 run on demand
 - **[k6-loadtest-script.yaml](k6-loadtest-script.yaml)**: `ConfigMap` holding the k6 script the CronJob runs
 - **[k6-loadtest-network-policy.yaml](k6-loadtest-network-policy.yaml)**: `CiliumNetworkPolicy`, egress from the k6 pods to podinfo
