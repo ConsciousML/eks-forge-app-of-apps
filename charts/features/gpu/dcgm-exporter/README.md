@@ -17,7 +17,7 @@ The [`dcgm-exporter` chart](./) deploys the [DCGM exporter](https://github.com/N
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| dcgm-exporter.nodeSelector | object | see values.yaml | Pins the exporter to the `gpu-node-pool` NodePool, with a matching `tolerations` entry. |
+| dcgm-exporter.nodeSelector | object | see values.yaml | Pins the exporter to the nodes of both GPU NodePools, with a matching `tolerations` entry. |
 
 ### Exporter
 
@@ -28,5 +28,5 @@ The [`dcgm-exporter` chart](./) deploys the [DCGM exporter](https://github.com/N
 
 ## Upstream Dependencies
 
-- **[`units/features/gpu/node_pool`](https://github.com/ConsciousML/eks-forge-catalog/tree/main/units/features/gpu/node_pool)** (catalog): the `gpu-node-pool` NodePool and its `karpenter.sh/workload-class=gpu` taint, which `nodeSelector` and `tolerations` must match
+- **[`units/features/gpu/node_pool`](https://github.com/ConsciousML/eks-forge-catalog/tree/main/units/features/gpu/node_pool)** (catalog): the `gpu-spot-node-pool` and `gpu-on-demand-node-pool` NodePools and their shared `karpenter.sh/workload-class=gpu` taint, which `nodeSelector` and `tolerations` must match
 - **[`kube-prometheus-stack`](../../../monitoring/kube-prometheus-stack/)** (core): the `ServiceMonitor` CRD, and the Grafana sidecar watching every namespace for `grafana_dashboard` `ConfigMap`s

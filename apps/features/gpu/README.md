@@ -2,7 +2,7 @@
 
 # `gpu` Root Chart Reference
 
-The [`gpu` root chart](./) lists the applications of the `gpu` optional feature. It renders one ArgoCD `Application` per entry under `applications`, through the [`app-of-apps` library chart](../../../charts/app-of-apps/). The applications run on the `gpu-node-pool` NodePool's nodes, which the catalog provisions.
+The [`gpu` root chart](./) lists the applications of the `gpu` optional feature. It renders one ArgoCD `Application` per entry under `applications`, through the [`app-of-apps` library chart](../../../charts/app-of-apps/). The applications run on the nodes of the `gpu-spot-node-pool` and `gpu-on-demand-node-pool` NodePools, which the catalog provisions.
 
 ## What's Inside
 
@@ -41,4 +41,4 @@ The [`gpu` root chart](./) lists the applications of the `gpu` optional feature.
 
 - **[`app-of-apps`](../../../charts/app-of-apps/)**: the template this chart renders
 - **[`core`](../../core/)**: the cluster-wide network policies, and `kube-prometheus-stack` for the `ServiceMonitor` CRD and Grafana's dashboard sidecar
-- **[`units/features/gpu`](https://github.com/ConsciousML/eks-forge-catalog/tree/main/units/features/gpu)** (catalog): provisions the `gpu-node-pool` NodePool and the root `Application` that points at this chart
+- **[`units/features/gpu`](https://github.com/ConsciousML/eks-forge-catalog/tree/main/units/features/gpu)** (catalog): provisions the `gpu-spot-node-pool` and `gpu-on-demand-node-pool` NodePools and the root `Application` that points at this chart
