@@ -7,7 +7,8 @@ spec:
     name: podinfo
   minReplicaCount: 1
   maxReplicaCount: 10
-  # Holds the current replicas while the metric is unreadable, never scales down blind.
+  # Holds the current replicas while Prometheus is unreachable, never scales down blind.
+  # An empty result (no traffic yet) reads as 0, not as an error.
   fallback:
     failureThreshold: 3
     replicas: 1
@@ -27,5 +28,3 @@ spec:
         query: sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[1m]))
         # TEMP: placeholder until the single-pod k6 measurement.
         threshold: "10"
-        # Errors on an empty result, so fallback applies instead of reading 0.
-        ignoreNullValues: "false"
