@@ -24,6 +24,7 @@ keda:
 
   # From the VPA target recommendations (goldilocks-keda-operator, goldilocks-keda-operator-metrics-apiserver,
   # and goldilocks-keda-admission-webhooks), revisit once more usage history accumulates.
+  # The chart's default 1 CPU limit stays, a parent chart can't null a subchart default.
   # -- Resource requests and limits of the operator, metrics API server, and admission webhooks.
   # @section -- Pods
   # @default -- see values.yaml
