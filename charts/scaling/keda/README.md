@@ -30,7 +30,7 @@ A trigger on a source other than Prometheus (e.g. SQS) needs a matching egress r
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | keda.resources | object | see values.yaml | Resource requests and limits of the operator, metrics API server, and admission webhooks. |
-| keda.nodeSelector | object | see values.yaml | Pins every KEDA pod to the `elastic` NodePool, with a matching `tolerations` entry. |
+| keda.nodeSelector | object | see values.yaml | Pins every KEDA pod to the `critical` NodePool, with a matching `tolerations` entry. |
 
 ### Monitoring
 

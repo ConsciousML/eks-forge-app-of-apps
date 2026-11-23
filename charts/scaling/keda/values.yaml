@@ -38,15 +38,15 @@ keda:
       requests: { cpu: 15m, memory: 100Mi }
       limits: { memory: 100Mi }
 
-  # -- Pins every KEDA pod to the `elastic` NodePool, with a matching `tolerations` entry.
+  # -- Pins every KEDA pod to the `critical` NodePool, with a matching `tolerations` entry.
   # @section -- Pods
   # @default -- see values.yaml
   nodeSelector:
-    karpenter.sh/nodepool: elastic
+    karpenter.sh/nodepool: critical
   tolerations:
     - key: karpenter.sh/workload-class
       operator: Equal
-      value: elastic
+      value: critical
       effect: NoSchedule
 
   # Source of the keda.yaml alerts in charts/monitoring/prometheus-rules.
