@@ -26,5 +26,5 @@ spec:
       metadata:
         serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
         query: sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[1m]))
-        # TEMP: placeholder until the single-pod k6 measurement.
-        threshold: "10"
+        # ~70% of one pod's measured plateau (~430 RPS at the 50m CPU limit).
+        threshold: "300"
