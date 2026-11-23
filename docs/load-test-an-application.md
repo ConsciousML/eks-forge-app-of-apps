@@ -190,11 +190,11 @@ Run the load test (see [Run the Load Test](#run-the-load-test)). Its `stages` mu
 
 Then, in Prometheus (see [Explore Your Metrics](/docs/monitoring/get-started/metrics/)), graph the pod's requests per second and the share of requests within the SLO's latency. For example, for podinfo's SLO of 100ms or less:
 ```promql
-sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[1m]))
+sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[2m]))
 
-sum(rate(http_request_duration_seconds_bucket{namespace="podinfo", path!~"healthz|readyz|metrics", le="0.1"}[1m]))
+sum(rate(http_request_duration_seconds_bucket{namespace="podinfo", path!~"healthz|readyz|metrics", le="0.1"}[2m]))
 /
-sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[1m]))
+sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[2m]))
 ```
 
 The pod's capacity is the highest requests per second before either the second query drops below the SLO's objective (e.g. `0.99`), or the requests per second stop growing while k6 keeps adding virtual users. Then check k6's `http_req_duration` in its summary. The app's own histogram only times requests once its handler starts, so it misses the time requests wait in a saturated pod.
@@ -270,7 +270,7 @@ spec:
     - type: prometheus
       metadata:
         serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
-        query: sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[1m]))
+        query: sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[2m]))
         threshold: "300"
   ...
 ```
