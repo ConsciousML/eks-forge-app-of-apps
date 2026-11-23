@@ -81,7 +81,7 @@ Add an `<app>-httproute` entry under `applications` in [`apps/core/values.yaml`]
 <Tabs groupId="gateway">
 <TabItem value="public" label="Public">
 
-For example, podinfo's route runs after `gateway-public` (wave `6`), at wave `7`:
+For example, podinfo's route runs after `gateway-public` (wave `6`) and podinfo (wave `8`), at wave `9`:
 ```yaml
   # Depends on:
   # - gateway-public
@@ -90,7 +90,7 @@ For example, podinfo's route runs after `gateway-public` (wave `6`), at wave `7`
     path: charts/gateway-api/httproute
     destination:
       namespace: podinfo
-    syncWave: 7
+    syncWave: 9
     extraValueFiles:
       - charts/gateway-api/gateway/public-gateway-values.yaml
       - charts/gateway-api/httproute/podinfo-httproute-values.yaml

@@ -112,13 +112,14 @@ Take into account these implicit dependencies when computing it:
 - **`network-policies-cluster-wide`**, at wave `3`.
 - **The DaemonSets**: if your app runs pods, at wave `3` or later (see [DaemonSets Priority](/docs/applications/how-the-app-of-apps-works/#daemonsets-priority)).
 
-For example, podinfo only depends on `network-policies-cluster-wide`, at wave `3`, so its `syncWave` is `3 + 1 = 4`:
+For example, podinfo's latest dependency is `keda`, at wave `7`, so its `syncWave` is `7 + 1 = 8`:
 ```yaml
   # Depends on:
+  # - keda (removes finalizer.keda.sh from the ScaledObject on delete)
   # - network-policies-cluster-wide
   - name: podinfo
     ...
-    syncWave: 4
+    syncWave: 8
 ```
 
 If your app deploys no workload, only resources others need, such as CRDs, and depends on no other entry, set its `syncWave` to `-1`.
