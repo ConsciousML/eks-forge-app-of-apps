@@ -474,7 +474,7 @@ applications:
     path: charts/scaling/keda
     destination:
       namespace: keda
-    syncWave: 4
+    syncWave: 7
 
   # --- Network Policies ---
   # Depends on:
@@ -490,7 +490,6 @@ applications:
   # Depends on:
   # - crds-sloth (podinfo-slo.yaml)
   # - crds-keda (podinfo-scaledobject.yaml)
-  # - keda (scales podinfo, replicas stay at 1 until it runs)
   # - network-policies-cluster-wide
   # - See DaemonSets Priority above.
   - name: podinfo
