@@ -22,6 +22,8 @@ A trigger on a source other than Prometheus (e.g. SQS) needs a matching egress r
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | keda.crds | object | `{"install":false}` | Disabled. `crds-keda` owns the CRDs. |
+| keda.rbac | object | `{"enabledCustomScaledRefKinds":false}` | Disabled, so a `ScaledObject` only targets a `Deployment` or `StatefulSet`. |
+| keda.permissions | object | see values.yaml | Restricts the operator and the metrics API server to Secrets in the `keda` namespace. |
 
 ### Pods
 
