@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gpu-smoke-test
+spec:
+  # Suspended, schedule never fires. A plain Job would work once, but ArgoCD won't
+  # recreate it after it completes. This stays re-triggerable with one command:
+  # kubectl create job --from=cronjob/gpu-smoke-test <name> -n gpu
+  schedule: "0 0 1 1 *"
+  suspend: true
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      # Bounds GPU node time when no capacity frees up or the sample hangs.
+      activeDeadlineSeconds: 900
+      ttlSecondsAfterFinished: 3600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: gpu-smoke-test
+        spec:
+          restartPolicy: Never
+          tolerations:
+            - key: "karpenter.sh/workload-class"
+              operator: "Equal"
+              value: "gpu"
+              effect: "NoSchedule"
+          # No karpenter.sh/capacity-type selector, so the pod fits the spot and on-demand
+          # GPU NodePools.
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      # Needs almost no GPU memory, so every GPU in the pool fits.
+                      - key: karpenter.k8s.aws/instance-gpu-memory
+                        operator: Gt
+                        values: ["1023"]
+                      # Small instances only.
+                      - key: karpenter.k8s.aws/instance-cpu
+                        operator: Lt
+                        values: ["5"]
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            # NVIDIA device plugin quickstart sample. Logs "Test PASSED" on success.
+            - name: vectoradd
+              image: nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda12.5.0
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  memory: 128Mi
+                  nvidia.com/gpu: 1
+              securityContext:
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]

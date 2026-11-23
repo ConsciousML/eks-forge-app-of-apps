@@ -13,6 +13,7 @@ The [`gpu` root chart](./) lists the applications of the `gpu` optional feature.
 - **[`gpu-namespaces`](../../../manifests/features/gpu/namespaces/)**: the feature's `gpu` namespace. Removing the feature deletes it
 - **[`gpu-nvidia-device-plugin`](../../../charts/features/gpu/nvidia-device-plugin/)**: advertises `nvidia.com/gpu` on GPU nodes
 - **[`gpu-dcgm-exporter`](../../../charts/features/gpu/dcgm-exporter/)**: exports GPU metrics to Prometheus, with the **GPU** Grafana dashboard
+- **[`gpu-smoke-test`](../../../manifests/features/gpu/smoke-test/)**: suspended `CronJob` running a CUDA sample on a GPU node, on demand
 
 ## Values
 
