@@ -22,20 +22,21 @@ keda:
       restrict:
         secret: true
 
-  # No VPA history yet. Revisit from the goldilocks-keda recommendations.
+  # From the VPA target recommendations (goldilocks-keda-operator, goldilocks-keda-operator-metrics-apiserver,
+  # and goldilocks-keda-admission-webhooks), revisit once more usage history accumulates.
   # -- Resource requests and limits of the operator, metrics API server, and admission webhooks.
   # @section -- Pods
   # @default -- see values.yaml
   resources:
     operator:
-      requests: { cpu: 25m, memory: 128Mi }
-      limits: { memory: 128Mi }
+      requests: { cpu: 15m, memory: 100Mi }
+      limits: { memory: 100Mi }
     metricServer:
-      requests: { cpu: 25m, memory: 128Mi }
-      limits: { memory: 128Mi }
+      requests: { cpu: 15m, memory: 100Mi }
+      limits: { memory: 100Mi }
     webhooks:
-      requests: { cpu: 15m, memory: 64Mi }
-      limits: { memory: 64Mi }
+      requests: { cpu: 15m, memory: 100Mi }
+      limits: { memory: 100Mi }
 
   # -- Pins every KEDA pod to the `elastic` NodePool, with a matching `tolerations` entry.
   # @section -- Pods
