@@ -1,0 +1,59 @@
+keda:
+  # -- Disabled. `crds-keda` owns the CRDs.
+  # @section -- Install
+  crds:
+    install: false
+
+  # Deployments and StatefulSets are built in. Off drops the get on every resource (KSV-0046).
+  # -- Disabled, so a `ScaledObject` only targets a `Deployment` or `StatefulSet`.
+  # @section -- Install
+  rbac:
+    enabledCustomScaledRefKinds: false
+
+  # No TriggerAuthentication reads a Secret (KSV-0041).
+  # -- Restricts the operator and the metrics API server to Secrets in the `keda` namespace.
+  # @section -- Install
+  # @default -- see values.yaml
+  permissions:
+    operator:
+      restrict:
+        secret: true
+    metricServer:
+      restrict:
+        secret: true
+
+  # No VPA history yet. Revisit from the goldilocks-keda recommendations.
+  # -- Resource requests and limits of the operator, metrics API server, and admission webhooks.
+  # @section -- Pods
+  # @default -- see values.yaml
+  resources:
+    operator:
+      requests: { cpu: 25m, memory: 128Mi }
+      limits: { memory: 128Mi }
+    metricServer:
+      requests: { cpu: 25m, memory: 128Mi }
+      limits: { memory: 128Mi }
+    webhooks:
+      requests: { cpu: 15m, memory: 64Mi }
+      limits: { memory: 64Mi }
+
+  # -- Pins every KEDA pod to the `elastic` NodePool, with a matching `tolerations` entry.
+  # @section -- Pods
+  # @default -- see values.yaml
+  nodeSelector:
+    karpenter.sh/nodepool: elastic
+  tolerations:
+    - key: karpenter.sh/workload-class
+      operator: Equal
+      value: elastic
+      effect: NoSchedule
+
+  # Source of the keda.yaml alerts in charts/monitoring/prometheus-rules.
+  # -- Exposes the operator's metrics, scraped through a `ServiceMonitor`.
+  # @section -- Monitoring
+  # @default -- see values.yaml
+  prometheus:
+    operator:
+      enabled: true
+      serviceMonitor:
+        enabled: true

@@ -3,8 +3,8 @@ kind: Deployment
 metadata:
   name: podinfo
 spec:
-  # No replicas set: the HPA owns this field. Setting it here would fight ArgoCD's
-  # selfHeal, which reverts spec.replicas back to whatever git declares on every sync.
+  # No replicas set. The HPA KEDA creates from podinfo-scaledobject.yaml owns this field,
+  # and ArgoCD's selfHeal would revert it to git's value on every sync.
   revisionHistoryLimit: 3
   selector:
     matchLabels:

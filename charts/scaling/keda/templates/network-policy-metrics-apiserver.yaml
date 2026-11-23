@@ -1,0 +1,28 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: keda-operator-metrics-apiserver
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: keda-operator-metrics-apiserver
+  ingress:
+    # Kubelet probes and the external.metrics.k8s.io APIService aggregation layer.
+    - fromEntities:
+        - host
+        - remote-node
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+  egress:
+    # Scaler metrics from the operator over gRPC.
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: keda-operator
+      toPorts:
+        - ports:
+            - port: "9666"
+              protocol: TCP

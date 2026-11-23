@@ -457,6 +457,25 @@ applications:
       - charts/gateway-api/gateway/private-gateway-values.yaml
       - charts/gateway-api/httproute/goldilocks-httproute-values.yaml
 
+  # --- KEDA ---
+  # Installed apart from the chart so apps ship a ScaledObject next to their manifests.
+  - name: crds-keda
+    path: manifests/crds/keda
+    destination:
+      namespace: argocd
+    syncWave: -1
+  # ServiceMonitor CRD is Terraform-managed.
+  # Depends on:
+  # - crds-keda
+  # - kube-prometheus-stack (Prometheus scaler queries)
+  # - network-policies-cluster-wide
+  # - See DaemonSets Priority above.
+  - name: keda
+    path: charts/scaling/keda
+    destination:
+      namespace: keda
+    syncWave: 4
+
   # --- Network Policies ---
   # Depends on:
   # - argocd-network-policies, network-policies-kube-system (default-deny.yaml selects
@@ -470,6 +489,8 @@ applications:
   # --- Podinfo ---
   # Depends on:
   # - crds-sloth (podinfo-slo.yaml)
+  # - crds-keda (podinfo-scaledobject.yaml)
+  # - keda (scales podinfo, replicas stay at 1 until it runs)
   # - network-policies-cluster-wide
   # - See DaemonSets Priority above.
   - name: podinfo
