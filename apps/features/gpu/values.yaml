@@ -55,3 +55,13 @@ applications:
     destination:
       namespace: gpu
     syncWave: 0
+
+  # --- Smoke test ---
+  # Depends on:
+  # - gpu-namespaces
+  # - gpu-nvidia-device-plugin, which advertises nvidia.com/gpu on the node
+  - name: gpu-smoke-test
+    path: manifests/features/gpu/smoke-test
+    destination:
+      namespace: gpu
+    syncWave: 1

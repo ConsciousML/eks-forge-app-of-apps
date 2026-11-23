@@ -22,9 +22,9 @@ Deploy the `dev` environment by following the [Run the Terragrunt Stack](/docs/q
 Connect to Tailscale and open the ArgoCD UI in your browser, as in the [Log In to ArgoCD](/docs/quickstart/deployment/#log-in-to-argocd) step of the dev deployment.
 
 ## Explore the App of Apps
-The home page shows one tile per ArgoCD [Application](https://argo-cd.readthedocs.io/en/stable/core_concepts/). Type `app-of-apps` in the search bar to find its tile.
+The home page shows one tile per ArgoCD [Application](https://argo-cd.readthedocs.io/en/stable/core_concepts/). Type `app-of-apps-core` in the search bar to find its tile.
 
-Click on it. The tree shows every other Application downstream of `app-of-apps`. Each one is an entry under `applications` in [`apps/core/values.yaml`](../apps/core/values.yaml) of your fork. Open this file and find the `podinfo` entry:
+Click on it. The tree shows every other Application downstream of `app-of-apps-core`. Each one is an entry under `applications` in [`apps/core/values.yaml`](../apps/core/values.yaml) of your fork. Open this file and find the `podinfo` entry:
 ```yaml
   - name: podinfo
     path: manifests/podinfo
@@ -34,7 +34,7 @@ Click on it. The tree shows every other Application downstream of `app-of-apps`.
 ```
 Its `path` points at the directory ArgoCD deploys this Application from.
 
-Back in the UI, click **Details** at the top of `app-of-apps`. Notice the **REPO URL** is your fork and the **TARGET REVISION** is your branch, `refs/heads/podinfo-message`.
+Back in the UI, click **Details** at the top of `app-of-apps-core`. Notice the **REPO URL** is your fork and the **TARGET REVISION** is your branch, `refs/heads/podinfo-message`.
 
 Go back to the home page, type `podinfo` in the search bar, and click on its tile. The tree shows the Kubernetes resources of this Application, such as its Pods and Service. Notice they match the files in [`manifests/podinfo/`](../manifests/podinfo/).
 

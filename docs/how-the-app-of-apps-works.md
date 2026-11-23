@@ -31,7 +31,7 @@ flowchart LR
     lbc -->|deploys charts/aws-lbc| res2["Deployment, Service, ..."]
 ```
 
-Terraform creates the root Application, `app-of-apps`, with the rest of the cluster. It points at the [`apps/core/`](../apps/core/) root chart, which renders, through the [`app-of-apps`](../charts/app-of-apps/) library chart, one child Application per entry under `applications` in [`apps/core/values.yaml`](../apps/core/values.yaml). Each child then deploys the manifests or chart at its entry's `path`.
+Terraform creates the root Application, `app-of-apps-core`, with the rest of the cluster. It points at the [`apps/core/`](../apps/core/) root chart, which renders, through the [`app-of-apps`](../charts/app-of-apps/) library chart, one child Application per entry under `applications` in [`apps/core/values.yaml`](../apps/core/values.yaml). Each child then deploys the manifests or chart at its entry's `path`.
 
 From then on, ArgoCD deploys every application from the app of apps repository. Adding an application is one entry in `apps/core/values.yaml`, with no Terraform change unless the application needs AWS resources or a value from a Terraform module.
 
@@ -51,7 +51,7 @@ The catalog passes values to child Applications through a single map, `appParams
 
 ```mermaid
 flowchart LR
-    tf["Catalog unit"] -->|Helm values| root["app-of-apps"]
+    tf["Catalog unit"] -->|Helm values| root["app-of-apps-core"]
     root --> params["appParams"]
     params -->|key| k1["podinfo-httproute"] -->|values| v1["host"] --> c1["Application<br/>podinfo-httproute"]
     params -->|key| k2["gateway-public"] -->|values| v2["certificateArn"] --> c2["Application<br/>gateway-public"]
