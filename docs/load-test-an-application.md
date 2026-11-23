@@ -303,21 +303,36 @@ Follow k6's output. It ends with a summary of the run, including the share of fa
 kubectl logs -f job/<job> -n <namespace>
 ```
 
-In another terminal, watch the HPA add replicas as the load grows, then remove them:
+In another terminal, watch the autoscaler add replicas as the load grows, then remove them:
+
+<Tabs groupId="autoscaler">
+<TabItem value="hpa" label="HPA">
+
 ```bash
-kubectl get hpa -n <namespace> -w
+kubectl get hpa <name> -n <namespace> -w
 ```
 
-If its `TARGETS` column still shows `<unknown>` after a minute, the HPA can't read its metric. For an HPA on CPU, its events say why, most often a container with no CPU `requests`:
+If its `TARGETS` column still shows `<unknown>` after a minute, the HPA can't read the CPU usage. Its events say why, most often a container with no CPU `requests`:
 ```bash
-kubectl describe hpa -n <namespace>
+kubectl describe hpa <name> -n <namespace>
 ```
 
-For a `ScaledObject`, its conditions say why, and the KEDA operator's logs hold the error of the trigger:
+</TabItem>
+<TabItem value="keda" label="KEDA">
+
+KEDA names the HPA it creates `keda-hpa-<name>`. Its `TARGETS` column shows the metric per pod against `threshold`:
+```bash
+kubectl get hpa keda-hpa-<name> -n <namespace> -w
+```
+
+If `TARGETS` shows `<unknown>`, or the `ScaledObject` shows `Fallback=True`, KEDA can't read the trigger's metric. The `ScaledObject`'s conditions say so, and the KEDA operator's logs hold the trigger's error (e.g. Prometheus unreachable):
 ```bash
 kubectl describe scaledobject <name> -n <namespace>
 kubectl logs -n keda -l app.kubernetes.io/name=keda-operator
 ```
+
+</TabItem>
+</Tabs>
 
 If every request fails, a network policy is dropping them. See [Find Dropped Traffic](/docs/security/write-network-policies/#find-dropped-traffic).
 
