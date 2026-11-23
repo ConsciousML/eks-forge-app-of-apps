@@ -24,8 +24,7 @@ spec:
     # Probes and scrapes excluded, same filter as podinfo-slo.yaml.
     - type: prometheus
       metadata:
-        # TEMP: unreachable address, tests the fallback.
-        serverAddress: http://unreachable.monitoring.svc.cluster.local:9090
+        serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
         query: sum(rate(http_request_duration_seconds_count{namespace="podinfo", path!~"healthz|readyz|metrics"}[1m]))
         # ~70% of one pod's measured plateau (~430 RPS at the 50m CPU limit).
         threshold: "300"
