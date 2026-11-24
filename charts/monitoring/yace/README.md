@@ -23,7 +23,7 @@ One gauge per ALB and statistic, one sample per 60s CloudWatch period, stamped w
 | `aws_applicationelb_httpcode_target_5_xx_count_sum` | `HTTPCode_Target_5XX_Count` `Sum` |
 | `aws_applicationelb_httpcode_elb_5_xx_count_sum` | `HTTPCode_ELB_5XX_Count` `Sum` |
 
-CloudWatch publishes `HTTPCode_ELB_5XX_Count` only once it's nonzero, and YACE discovers a new metric up to about 15 minutes later. Wrap each error term in `or vector(0)`. Data lags about 3 minutes (60s publishing plus the 120s `delay`).
+CloudWatch publishes both 5XX metrics only once they're nonzero, and YACE discovers a new metric once `ListMetrics` lists it, up to 15 minutes later. Wrap each error term in `or vector(0)`. Data lags about 3 minutes (60s publishing plus the 120s `delay`).
 
 ## Values
 
