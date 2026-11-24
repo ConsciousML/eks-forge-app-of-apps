@@ -40,8 +40,8 @@ spec:
         ticketAlert:
           labels:
             severity: warning
-    # TargetResponseTime includes queueing in the pod, unlike podinfo's own histogram.
-    # Slow samples are the total minus TC(:0.1), the samples of 100ms or less.
+    # TargetResponseTime runs from the ALB forwarding a request to podinfo's response headers, queueing in the pod included.
+    # TC(:0.1) counts its samples of 100ms or less per minute, so slow is SampleCount minus TC. 502 and 504 have no sample.
     - name: requests-latency
       objective: 99
       description: "99% of podinfo HTTP requests through its ALB get response headers in 100ms or less."
