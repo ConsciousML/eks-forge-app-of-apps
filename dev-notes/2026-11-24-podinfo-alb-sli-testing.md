@@ -1,134 +1,155 @@
-# Dev Note: Testing podinfo's ALB SLIs on `dev` (2026-11-24)
+# Dev Note: Testing podinfo's ALB SLIs on `dev`
 
-What was run to test #166 (eks-forge-app-of-apps PR #169, eks-forge-catalog PR #371), in order, with what happened. Times are UTC.
+How to test every acceptance criterion of #166 (eks-forge-app-of-apps PR #169, eks-forge-catalog PR #371), in the order they were run on 2026-11-24. Each test lists its steps, what passes, and the result seen that day.
+
+CloudWatch data reaches Prometheus 3 to 5 minutes after the requests. Every check below waits for it.
 
 ## Setup
 
-1. Deployed the full `dev` stack from the catalog branch `podinfo-alb-sli`, with `.app-of-apps-branch` set to the same branch and `PAGERDUTY_ENABLED=true` exported in the shell:
+1. Deploy `dev` from the catalog branch, with `.app-of-apps-branch` set to the same branch, and paging on:
    ```bash
+   export PAGERDUTY_ENABLED=true
    cd pipelines/dev/eks/stack
    terragrunt stack generate
    terragrunt run --all apply --non-interactive --no-stack-generate
    ```
-2. Pointed kubectl at the cluster, and checked that all 53 Argo CD apps were Synced and Healthy:
+2. Point kubectl at the cluster, and check that every Argo CD app is Synced and Healthy:
    ```bash
    aws eks update-kubeconfig --region us-east-1 --name dev-cluster
    kubectl get applications -n argocd
    ```
-3. Port-forwarded YACE and Prometheus. Every query below runs against `localhost:19090`:
+3. Open Prometheus. Use `https://prometheus.private.dev.<base_domain>` over Tailscale, or a port-forward:
    ```bash
-   kubectl port-forward -n yace svc/yace 15000:80
    kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 19090:9090
    ```
-4. Installed k6 with `mise x aqua:grafana/k6@latest -- k6 version`. The script is [`scripts/k6/alb-load-test.js`](../scripts/k6/alb-load-test.js).
+4. Check that YACE exports podinfo's ALB. This query should return series:
+   ```promql
+   aws_applicationelb_request_count_sum{tag_eks_forge_io_slo_service="podinfo"}
+   ```
+5. Install k6 with `mise x aqua:grafana/k6@latest -- k6 version`. The load test script is [`scripts/k6/alb-load-test.js`](../scripts/k6/alb-load-test.js). Every `k6 run` below targets `-e BASE_URL=https://podinfo.public.dev.<base_domain>/`.
 
-## 1. YACE Exports Nothing
+To pause autoscaling at N pods (1 or 0), and to resume it after a test:
+```bash
+kubectl annotate scaledobject podinfo -n podinfo autoscaling.keda.sh/paused-replicas="<N>" --overwrite
+kubectl annotate scaledobject podinfo -n podinfo autoscaling.keda.sh/paused-replicas-
+```
 
-`kubectl logs -n yace deploy/yace` showed `Couldn't get account Id ... STS: GetCallerIdentity ... i/o timeout` every scrape. YACE calls STS for the account ID before each discovery job and skips the job when the call fails (`pkg/job/scrape.go`). The network policy only allowed the `monitoring` and `tagging` endpoints.
+## 1. The ALB Count Matches k6
 
-Fix: `world` egress on 443 for STS, chosen over an STS endpoint (about $7/month per AZ), plus `disable-account-alias-lookup: true`.
+**Steps:** with autoscaling on, run 10 minutes at 200 RPS:
+```bash
+k6 run -e BASE_URL=... -e RATE=200 -e DURATION=10m --summary-export run.json scripts/k6/alb-load-test.js
+```
+Then sum the ALB's requests over the run's minutes, with `T` the end of the last minute:
+```promql
+sum(sum_over_time(aws_applicationelb_request_count_sum{tag_eks_forge_io_slo_service="podinfo"}[11m] @ T))
+```
 
-After the fix, `curl localhost:15000/metrics | grep aws_applicationelb` listed the series, carrying `tag_eks_forge_io_slo_service="podinfo"`.
+**Passes when** the ALB count equals k6's `http_reqs` plus the blackbox probes (about 4 per minute), within 1%. `aws_applicationelb_target_response_time_sample_count` should equal `RequestCount`.
 
-Found at the same time:
-- The TC metric is `aws_applicationelb_target_response_time_tc__0_1_`, with two underscores, not three. Fixed in the SLO.
-- `aws cloudwatch list-metrics` doesn't list `HTTPCode_Target_5XX_Count` while it's zero, so the `or vector(0)` fallback is needed on every 5XX term.
+**Result:** pass. The ALB counted 120,045, which is k6's 120,001 plus 44 probes. `SampleCount` matched `RequestCount` every minute.
 
-## 2. 5XX Discovery Delay (16:53)
+## 2. The Availability Page
 
-Sent 2 minutes of 500s, the same as the Get Your First Page tutorial:
+**Steps:** send 2 minutes of 500s:
 ```bash
 for i in $(seq 120); do curl -s -o /dev/null https://podinfo.public.dev.<base_domain>/status/500; sleep 1; done
 ```
 
-`ListMetrics` listed `HTTPCode_Target_5XX_Count` and YACE exported it about 3 minutes after the first 500. `PodinfoAvailabilityBudgetBurn` fired as `critical` and `warning`, with a 5m error ratio of 0.84.
+**Passes when** `PodinfoAvailabilityBudgetBurn` with `severity="critical"` fires, and a PagerDuty incident opens on `dev-eks-forge`.
 
-## 3. Run 1: ALB Counts Against k6 (16:58, 200 RPS, 10 min, Autoscaling On)
+**Result:** pass. The alert fired within about 5 minutes of the first 500, with a 5m error ratio of 0.84.
 
+## 3. The Latency Page
+
+**Steps:** pause autoscaling at 1 pod, then send more than one pod handles:
 ```bash
-k6 run -e BASE_URL=https://podinfo.public.dev.<base_domain>/ -e RATE=200 -e DURATION=10m -e RTT_MS=100 --summary-export run1.json scripts/k6/alb-load-test.js
+k6 run -e BASE_URL=... -e RATE=380 -e DURATION=5m scripts/k6/alb-load-test.js
+```
+Watch the share of slow requests per minute:
+```promql
+1 - aws_applicationelb_target_response_time_tc__0_1_ / aws_applicationelb_target_response_time_sample_count
 ```
 
-`RTT_MS=100` came from a 5 RPS baseline run, whose minimum time to first byte was 100.9ms.
+**Passes when** `PodinfoLatencyBudgetBurn` with `severity="critical"` fires and reaches PagerDuty. The page needs more than 14.4% of requests over 100ms.
 
-Result, summed per minute with `aws_applicationelb_*{tag_eks_forge_io_slo_service="podinfo"}[11m]`:
-- **Requests:** ALB `RequestCount` was 120,045, which is k6's 120,001 plus 44 blackbox probes (about 4 per minute). Exact.
-- **Samples:** `TargetResponseTime` `SampleCount` = `RequestCount`.
-- **Latency:** the ALB's fast ratio was 98.44%, k6's 97.79%. The gap comes from the laptop's round trip, which ranged from 19 to 101ms. The ALB numbers are the reference.
-- podinfo stayed on 1 pod. 200 RPS is under KEDA's threshold of 300.
+**Result:** pass. 83% were slow in the first minute, and the page fired. At podinfo's 35M memory limit, the pod is OOMKilled about a minute into this load. 300 RPS stays below the page threshold (4 to 9% slow). A page with no crash is #167. During the crash, `up{namespace="podinfo"}` was 0: the old histogram SLI would have had no data.
 
-## 4. Run 2: Latency Page With Autoscaling Paused (17:12, 500 RPS)
+## 4. The Outage Page and SLI
 
+**Steps:** pause autoscaling at 0 pods, then send light traffic so the ALB answers with 503s:
 ```bash
-kubectl annotate scaledobject podinfo -n podinfo autoscaling.keda.sh/paused-replicas="1" --overwrite
-k6 run -e RATE=500 -e DURATION=20m ...
+k6 run -e BASE_URL=... -e RATE=5 -e DURATION=10m scripts/k6/alb-load-test.js
 ```
 
-- **17:16:59:** `PodinfoLatencyBudgetBurn` fired as `critical`. In the first minute, the ALB counted 83% of requests over 100ms (901 fast out of 5,457 samples).
-- **About 17:17:** the pod was OOMKilled at its 35M memory limit and went into CrashLoopBackOff. The availability page, `PodinfoDown` and `EndpointDown` fired as well. I stopped k6.
-- **Old SLI:** Prometheus couldn't scrape the pod (`up{namespace="podinfo"} == 0`, connection refused). The old histogram SLI, and KEDA's RPS query, had no data.
-- **502 and 504** don't appear in `TargetResponseTime`. In the 17:12 minute, `RequestCount` was 10,249 against a `SampleCount` of 5,457.
-- **503** isn't counted in `RequestCount`, but it is in `HTTPCode_ELB_5XX_Count`. The availability error ratio went above 1.
-
-Fix: added `HTTPCode_ELB_503_Count` to YACE and to the availability total.
-
-## 5. PagerDuty Received Nothing
-
-Alertmanager logged `unexpected status code 400: Event object is invalid: 'summary' is missing or blank`. The `slo` critical route had no `group_by`, so every SLO page shared one group, and `{{ .CommonAnnotations.summary }}` was empty whenever two different alerts fired together.
-
-Fix: `group_by: [alertname]` on that route. After the config reloaded at 17:31, the two firing pages reached PagerDuty as separate incidents. No failures since.
-
-## 6. Run 3: Outage (17:39, Paused at 0 Pods, 5 RPS)
-
-```bash
-kubectl annotate scaledobject podinfo -n podinfo autoscaling.keda.sh/paused-replicas="0" --overwrite
-k6 run -e RATE=5 -e DURATION=10m ...
+**Passes when** `PodinfoDown` reaches PagerDuty within 10 minutes, and the availability SLI reads 1:
+```promql
+slo:sli_error:ratio_rate5m{sloth_service="podinfo", sloth_slo="requests-availability"}
 ```
 
-- **17:43:** the ELB 503 series was exported. The error ratio was 0.978, which stays ≤ 1 now that 503s are in the total.
-- **17:45:24:** `PodinfoDown` fired and reached PagerDuty.
-- **SLI empty:** with no pod, CloudWatch also stops publishing `RequestCount`, so the total was empty.
+**Result:** pass. The SLI read 1 after about 5 minutes, and `PodinfoDown` fired after about 6.
 
-Fix: `or vector(0)` on the `RequestCount` term. Evaluating the new query at 17:46:30 returned 1, where the old one returned no data.
+## 5. Two Pages at Once
 
-## 7. Runs 4 and 5: Latency Page Without a Crash (17:51)
+**Steps:** none of its own. Tests 3 and 4 fire several SLO pages at the same time.
 
-Autoscaling paused at 1 pod both times.
+**Passes when** each firing page has its own PagerDuty incident. Alertmanager's logs should show no `Notify for alerts failed` for `slo-critical-pagerduty`:
+```bash
+kubectl logs -n monitoring alertmanager-kube-prometheus-stack-alertmanager-0 -c alertmanager | grep -i pagerduty
+```
 
-| Run | RPS | Slow requests | Result |
-|---|---|---|---|
-| 4 | 380 | 83% in the first minute | OOMKilled within about 30s. The latency page at 17:55:39 came from this minute |
-| 5 | 300 | 8.6%, then 4.4% | pod stable. The page needs over 14.4%, so it didn't fire |
+**Result:** pass. The availability, latency, and `PodinfoDown` pages each arrived as their own incident.
 
-So a latency page with no crash can't be reached with podinfo's current limits. That's tracked in #167.
+## 6. The Error Ratio Stays Valid
 
-YACE lagged up to about 5 minutes behind CloudWatch (publishing, the 120s `delay`, and one 60s poll), not about 3. The docs say 3 to 5 now.
+**Steps:**
+1. Check the availability SLI while healthy.
+2. Read it during test 4.
+3. Block YACE's egress for 5 minutes with a temporary policy, then delete it:
+   ```yaml
+   apiVersion: cilium.io/v2
+   kind: CiliumNetworkPolicy
+   metadata:
+     name: tmp-test-yace-deny-egress
+     namespace: yace
+   spec:
+     endpointSelector:
+       matchLabels:
+         app.kubernetes.io/name: yet-another-cloudwatch-exporter
+     egressDeny:
+       - toEntities: [all]
+         toPorts:
+           - ports:
+               - port: "443"
+                 protocol: TCP
+   ```
 
-## 8. Review Fix: NaN Total (18:25)
+**Passes when:**
+- The SLI reads 0 while healthy, and 1 during the outage.
+- It reads empty, not NaN, while YACE has no data.
+- No 5m sample is NaN:
+  ```promql
+  count_over_time((slo:sli_error:ratio_rate5m{sloth_service="podinfo", sloth_slo="requests-availability"} != slo:sli_error:ratio_rate5m{sloth_service="podinfo", sloth_slo="requests-availability"})[1h:])
+  ```
 
-A total of 0/0 is NaN, and a single NaN 5m sample makes Sloth's 30d budget NaN for 30 days. The reviewer's single-selector total failed with `vector cannot contain metrics with the same labelset`. Used `(... or vector(0)) + (... or vector(0))) > 0` instead.
+**Result:** pass. The SLI read 0, then 1, then empty. There were no NaN samples, and the 30d ratio stayed a number.
 
-Retested:
-- **Healthy:** ratio 0.
-- **Paused at 0 pods with 5 RPS:** ratio 1 at 18:32, and `PodinfoDown` paged at 18:33.
-- **YACE egress blocked** with a temporary `egressDeny` policy, deleted afterwards: ratio empty, not NaN.
-- **NaN check:** no NaN 5m samples in the last hour (`count_over_time((x != x)[1h:])`), and the 30d ratio is a number.
+## Clean Up
 
-## Not Run
+```bash
+kubectl annotate scaledobject podinfo -n podinfo autoscaling.keda.sh/paused-replicas-
+kubectl delete ciliumnetworkpolicy tmp-test-yace-deny-egress -n yace --ignore-not-found
+```
 
-- Terratest `TestStackExists`, which needs Tailscale.
+PagerDuty incidents resolve on their own once the alerts clear.
 
 ## Where to Look
 
-- **Grafana** (Dashboards, SLOs folder): **SLO / Detail**, service `podinfo`.
-- **Prometheus:**
-  - **Alerts** tab: search `Podinfo`.
-  - `slo:sli_error:ratio_rate5m{sloth_service="podinfo"}`: what the alerts read.
-  - `aws_applicationelb_*{tag_eks_forge_io_slo_service="podinfo"}`: per-minute counts. Use `sum_over_time`, never `rate`.
-  - `up{namespace="podinfo"}`: 0 when the pod can't be scraped.
-- **Alertmanager:** alert groups and receivers. Notify errors are in its logs (`grep -i pagerduty`).
+- **Grafana** (Dashboards, SLOs folder): **SLO / Detail**, service `podinfo`. Shows the SLI, the burn rate, and the budget.
+- **Prometheus:** the **Alerts** tab (search `Podinfo`), and the queries above. CloudWatch counts are per minute, so use `sum_over_time`, never `rate`.
+- **Alertmanager** (`https://alertmanager.private.dev.<base_domain>`): alert groups and their receivers.
 - **Slack:** `#dev-slo-critical` and `#dev-slo-warning`.
-- **PagerDuty:** service `dev-eks-forge`.
+- **PagerDuty:** the `dev-eks-forge` service.
 - **When a series is missing:**
   - `kubectl logs -n yace deploy/yace`
   - `aws cloudwatch list-metrics --namespace AWS/ApplicationELB`
