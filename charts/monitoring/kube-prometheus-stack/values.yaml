@@ -195,7 +195,7 @@ kube-prometheus-stack:
       ruleSelectorNilUsesHelmValues: false
 
       # yace re-exports the last 5 CloudWatch points on each scrape (exportAllDataPoints).
-      # -- Accepts samples up to 10m older than the newest one of a series, for the CloudWatch timestamps of `yace`.
+      # -- Accepts samples up to 10m older than the newest sample in the TSDB head, for the CloudWatch timestamps of `yace`. Its oldest re-exported point is 7m old (`length` 300s plus `delay` 120s).
       # @section -- Prometheus
       tsdb:
         outOfOrderTimeWindow: 10m

@@ -68,9 +68,11 @@ spec:
             +
             (sum(sum_over_time(aws_applicationelb_httpcode_elb_5_xx_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
           totalQuery: |
-            (sum(sum_over_time(aws_applicationelb_request_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
-            +
-            (sum(sum_over_time(aws_applicationelb_httpcode_elb_503_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
+            (
+              (sum(sum_over_time(aws_applicationelb_request_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
+              +
+              (sum(sum_over_time(aws_applicationelb_httpcode_elb_503_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
+            ) > 0
       ...
 ```
 
@@ -82,7 +84,7 @@ To measure your app's SLIs at the ALB the same way:
 - **Give it its own Gateway.** The ALB's own `5xx` (`HTTPCode_ELB_5XX_Count`) can't be split per app on a shared ALB. Each ALB costs about $16/month, so give an SLO only to the apps that need one.
 - **Tag that ALB.** Set `eks-forge.io/slo-service: <name>` under `tags` in the Gateway's values file, as in [`public-gateway-values.yaml`](../charts/gateway-api/gateway/public-gateway-values.yaml). `yace` then exports its metrics with the label `tag_eks_forge_io_slo_service="<name>"`.
 - **Sum, never rate.** Each series holds one count per minute, so sum it with `sum_over_time`, as above.
-- **Fall back to 0.** CloudWatch publishes a `5xx` metric only once it's nonzero, and stops `RequestCount` when no pod is behind the ALB. Wrap each term in `or vector(0)`, after `sum`.
+- **Fall back to 0, then drop a zero total.** CloudWatch publishes a `5xx` metric only once it's nonzero, and stops `RequestCount` when no pod is behind the ALB. Wrap each term in `or vector(0)`, after `sum`. Then filter the total with `> 0`, so it's empty instead of 0 when both its terms are missing (e.g. while `yace` restarts). A ratio of 0/0 is `NaN`, and a single `NaN` sample makes Sloth's 30-day error budget `NaN` for 30 days.
 - **Add the ALB's `503` to the total.** The ALB answers `503` when no pod is healthy, and those requests are missing from `RequestCount`. Without them, the error ratio goes above 1 during an outage.
 - **Count `502` and `504` in an availability SLO.** The ALB generates them itself, so they're missing from `TargetResponseTime`, and a latency SLO never sees them.
 - **Page on a full outage separately.** Probes keep failing even with no traffic, which leaves the SLIs without data. Add a page alert on the blackbox probe of your app's URL, as in [`podinfo-down.yaml`](../manifests/podinfo/podinfo-down.yaml).

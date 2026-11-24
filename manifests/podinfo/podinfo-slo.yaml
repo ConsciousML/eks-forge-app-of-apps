@@ -10,6 +10,7 @@ spec:
     # The ALB 5XX has no TargetGroup dimension, so podinfo must stay the only app on its Gateway.
     # A 503 (no healthy target) is missing from RequestCount, so the total adds it back.
     # With no pod, RequestCount stops too, so an outage reads as 100% errors.
+    # A zero total is dropped (> 0), never 0/0: one NaN sample breaks the 30d budget for 30 days.
     # A missing 5XX series reads as 0.
     - name: requests-availability
       objective: 99
@@ -21,9 +22,11 @@ spec:
             +
             (sum(sum_over_time(aws_applicationelb_httpcode_elb_5_xx_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
           totalQuery: |
-            (sum(sum_over_time(aws_applicationelb_request_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
-            +
-            (sum(sum_over_time(aws_applicationelb_httpcode_elb_503_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
+            (
+              (sum(sum_over_time(aws_applicationelb_request_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
+              +
+              (sum(sum_over_time(aws_applicationelb_httpcode_elb_503_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
+            ) > 0
       alerting:
         name: PodinfoAvailabilityBudgetBurn
         labels:
