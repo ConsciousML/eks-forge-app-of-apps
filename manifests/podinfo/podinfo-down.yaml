@@ -6,7 +6,7 @@ spec:
   groups:
     - name: podinfo-down
       rules:
-        # With no registered target the ALB SLIs have no data, so a full outage pages here.
+        # Without traffic the ALB SLIs have no data, so a full outage always pages here.
         # component: slo takes the PagerDuty route. EndpointDown still posts to Slack.
         - alert: PodinfoDown
           expr: probe_success{target="podinfo"} == 0
