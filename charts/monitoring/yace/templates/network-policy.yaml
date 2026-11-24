@@ -1,0 +1,36 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: yace
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: yet-another-cloudwatch-exporter
+  ingress:
+    # Kubelet liveness and readiness probes.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
+    # kube-prometheus-stack scraping /metrics (ServiceMonitor).
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
+  egress:
+    # CloudWatch and Resource Groups Tagging APIs, via the VPC interface endpoints.
+    - toCIDR:
+        {{- range concat .Values.vpcEndpointCidrs.monitoring .Values.vpcEndpointCidrs.tagging }}
+        - {{ . }}/32
+        {{- end }}
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

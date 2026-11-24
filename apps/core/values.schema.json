@@ -56,7 +56,8 @@
         "alertmanager-httproute": { "type": "object" },
         "goldilocks-httproute": { "type": "object" },
         "hubble-ui-httproute": { "type": "object" },
-        "blackbox-exporter": { "type": "object" }
+        "blackbox-exporter": { "type": "object" },
+        "yace": { "type": "object" }
       }
     }
   }

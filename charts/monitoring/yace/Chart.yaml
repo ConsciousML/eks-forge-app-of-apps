@@ -1,0 +1,9 @@
+apiVersion: v2
+name: yace
+description: YACE, exports the CloudWatch metrics of the ALBs carrying an SLO to Prometheus
+type: application
+version: 0.1.0
+dependencies:
+  - name: yet-another-cloudwatch-exporter
+    version: 0.39.1
+    repository: https://prometheus-community.github.io/helm-charts

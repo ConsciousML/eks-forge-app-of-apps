@@ -13,6 +13,10 @@ Pick the gateway that fits your app. Each one is an [Application Load Balancer](
 
 Both serve your app over HTTPS only. A request over HTTP gets a 301 redirect to HTTPS.
 
+:::warning
+The public gateway serves only podinfo, since podinfo's SLOs are measured at its ALB. An app with an SLO measured at the ALB needs a Gateway of its own (see [Measure at the Load Balancer](/docs/monitoring/paging/add-an-slo-and-page-alert/#measure-at-the-load-balancer)). In a fork without podinfo, remove its `eks-forge.io/slo-service` tag from [`public-gateway-values.yaml`](../charts/gateway-api/gateway/public-gateway-values.yaml) before routing other apps through it.
+:::
+
 For why there are two gateways, and how a request reaches your app, see [How Ingress Works](/docs/networking/how-ingress-works/).
 
 ## In Your App of Apps Fork

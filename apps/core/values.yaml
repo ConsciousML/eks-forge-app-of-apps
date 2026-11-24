@@ -239,6 +239,21 @@ applications:
       namespace: monitoring
     syncWave: 10
 
+  # --- YACE ---
+  # Depends on:
+  # - network-policies-cluster-wide
+  # - kube-prometheus-stack (outOfOrderTimeWindow accepts the past points YACE re-exports)
+  # - gateway-public (the tagged ALB YACE discovers)
+  - name: yace
+    path: charts/monitoring/yace
+    destination:
+      namespace: yace
+    syncWave: 7
+    tool:
+      helm:
+        # Must match the catalog's Pod Identity association's expected ServiceAccount name.
+        releaseName: yace
+
   # --- Sloth ---
   # Installed apart from the chart so apps ship a PrometheusServiceLevel next to their manifests.
   - name: crds-sloth

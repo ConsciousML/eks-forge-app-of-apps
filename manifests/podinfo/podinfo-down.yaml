@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: podinfo-down
+spec:
+  groups:
+    - name: podinfo-down
+      rules:
+        # With no registered target the ALB SLIs have no data, so a full outage pages here.
+        # component: slo takes the PagerDuty route. EndpointDown still posts to Slack.
+        - alert: PodinfoDown
+          expr: probe_success{target="podinfo"} == 0
+          for: 5m
+          labels:
+            component: slo
+            severity: critical
+          annotations:
+            summary: "podinfo is unreachable"
+            description: "The blackbox probe of podinfo's public URL has failed for 5m."
