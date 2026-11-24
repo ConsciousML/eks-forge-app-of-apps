@@ -31,7 +31,7 @@ CloudWatch publishes `HTTPCode_ELB_5XX_Count` only once it's nonzero, and YACE d
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| vpcEndpointCidrs | object | see values.yaml | Interface endpoint IPs of the CloudWatch (`monitoring`) and Resource Groups Tagging (`tagging`) APIs, the only egress of the exporter. Injected by the catalog via `appParams`. |
+| vpcEndpointCidrs | object | see values.yaml | Interface endpoint IPs of the CloudWatch (`monitoring`) and Resource Groups Tagging (`tagging`) APIs. Injected by the catalog via `appParams`. |
 
 ### Discovery
 
@@ -48,7 +48,7 @@ CloudWatch publishes `HTTPCode_ELB_5XX_Count` only once it's nonzero, and YACE d
 | yet-another-cloudwatch-exporter.image | object | see values.yaml | YACE image, pinned. |
 | yet-another-cloudwatch-exporter.fullnameOverride | string | `"yace"` | Release-independent names. The ServiceAccount must match the catalog's Pod Identity association. |
 | yet-another-cloudwatch-exporter.testConnection | bool | `false` | Upstream `helm test` Pod, off. Its egress isn't allowed by the network policy. |
-| yet-another-cloudwatch-exporter.extraArgs | object | see values.yaml | Seconds between two CloudWatch scrapes. |
+| yet-another-cloudwatch-exporter.extraArgs | object | see values.yaml | Seconds between two CloudWatch scrapes, and the `account_alias` lookup turned off. |
 | yet-another-cloudwatch-exporter.resources | object | see values.yaml | Resource requests and limits. |
 | yet-another-cloudwatch-exporter.podSecurityContext | object | see values.yaml | Pod-level non-root user, UID and GID 65534. |
 | yet-another-cloudwatch-exporter.securityContext | object | see values.yaml | Container-level read-only root filesystem, no privilege escalation, and no capabilities. |
