@@ -82,7 +82,7 @@ To measure your app's SLIs at the ALB the same way:
 - **Fall back to 0 on errors.** CloudWatch publishes a `5xx` metric only once it's nonzero, so wrap each error term in `or vector(0)`, after `sum`.
 - **Page on a full outage separately.** With no pod behind the ALB, the SLIs have no data. Add a page alert on the blackbox probe of your app's URL, as in [`podinfo-down.yaml`](../manifests/podinfo/podinfo-down.yaml).
 
-CloudWatch data reaches Prometheus about 3 minutes late, so the alerts fire and resolve a few minutes late. The first `5xx` the ALB returns itself (`HTTPCode_ELB_5XX_Count`) can take up to about 15 minutes more to show up, while `yace` discovers the new metric. Your app's own `5xx` show up without that delay.
+CloudWatch data reaches Prometheus about 3 minutes late, so the alerts fire and resolve a few minutes late. After a period without `5xx`, the first one can take a few more minutes to show up, while `yace` discovers the new metric (AWS allows up to 15 minutes).
 
 For the metrics `yace` exports, see the [`yace` Helm Chart](/docs/reference/helm_charts/monitoring/yace/) reference.
 
