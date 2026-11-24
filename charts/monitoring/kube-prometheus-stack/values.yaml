@@ -393,7 +393,9 @@ kube-prometheus-stack:
               - component = "uptime"
               - severity = "warning"
           # pagerduty.enabled adds the PagerDuty page on top of Slack.
+          # One group per alert, so the PagerDuty summary (CommonAnnotations) is never empty.
           - receiver: "slo-critical{{ if .Values.pagerduty.enabled }}-pagerduty{{ end }}"
+            group_by: ["alertname"]
             matchers:
               - component = "slo"
               - severity = "critical"
