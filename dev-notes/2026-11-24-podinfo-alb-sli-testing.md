@@ -54,7 +54,7 @@ CloudWatch data reaches Prometheus 3 to 5 minutes after the requests: CloudWatch
 | `PodinfoLatencyBudgetBurn` | `warning` | `[FIRING:1] PodinfoLatencyBudgetBurn (warning)` | none, Slack only |
 | `PodinfoDown` | `critical` | `[FIRING:1] PodinfoDown (critical)` | `podinfo is unreachable` |
 
-The Slack titles come from the `slack.default.title` template in `charts/monitoring/kube-prometheus-stack/values.yaml`. They weren't captured from Slack. The PagerDuty titles are each alert's `summary`. The `slo-warning` route has no `group_by`, so when two different SLO warnings fire together, their title loses the alert name: `[FIRING:2]  (warning)`.
+The Slack titles come from the `slack.default.title` template in `charts/monitoring/kube-prometheus-stack/values.yaml`. They weren't captured from Slack. The PagerDuty titles are each alert's `summary`. The root route groups by `[namespace, alertname]`, so every alert name gets its own Slack message and PagerDuty incident.
 
 Labels of a firing Sloth page in Prometheus:
 ```text
@@ -172,7 +172,7 @@ An earlier run of the same test (`T0` 17:39:29) went the same way. `PodinfoDown`
 kubectl logs -n monitoring alertmanager-kube-prometheus-stack-alertmanager-0 -c alertmanager | grep -i pagerduty
 ```
 
-**Result: pass,** once `group_by: [alertname]` was on the `slo` critical route. Alertmanager loaded it at 17:31. The two pages still firing then (availability and latency) each arrived as their own incident, and `PodinfoDown` arrived on its own in test 4.
+**Result: pass,** once `alertname` was in the route's `group_by`. On the day this was `[alertname]` on the `slo` critical route, loaded at 17:31. The PR now sets `[namespace, alertname]` on the root route instead, which all routes inherit and which wasn't retested. The two pages still firing then (availability and latency) each arrived as their own incident, and `PodinfoDown` arrived on its own in test 4.
 
 ## 6. The Error Ratio Stays Valid
 
@@ -228,7 +228,7 @@ PagerDuty incidents resolve on their own once the alerts clear.
 | Only `Another scrape is already in process` in YACE's logs, and the series stop | All of YACE's egress is blocked |
 | The latency SLI is empty, while `RequestCount` is present | Wrong TC metric name. It's `aws_applicationelb_target_response_time_tc__0_1_`, with two underscores |
 | No `aws_applicationelb_httpcode_*` series in a healthy period | Normal: CloudWatch doesn't publish a 5XX metric at zero. The SLIs fall back to 0 |
-| Alertmanager logs `notify retry canceled due to unrecoverable error after 1 attempts: unexpected status code 400: Event object is invalid: 'summary' is missing or blank`, and no incident opens | Two different SLO pages in one group, so `CommonAnnotations.summary` is empty. Needs `group_by: [alertname]` on the route |
+| Alertmanager logs `notify retry canceled due to unrecoverable error after 1 attempts: unexpected status code 400: Event object is invalid: 'summary' is missing or blank`, and no incident opens | Two different SLO pages in one group, so `CommonAnnotations.summary` is empty. The root route used the chart default `group_by: [namespace]`, and SLO alerts have no `namespace`. Needs `alertname` in `group_by` |
 | Prometheus returns `vector cannot contain metrics with the same labelset` for `sum(sum_over_time({__name__=~"aws_applicationelb_request_count_sum\|aws_applicationelb_httpcode_elb_503_count_sum", ...}[5m]))` | `sum_over_time` drops `__name__`, so the two series collide. That's why the total uses `((A or vector(0)) + (B or vector(0))) > 0` |
 | The availability error ratio goes above 1 during an outage | ALB 503s are in `HTTPCode_ELB_5XX_Count` but not in `RequestCount`. The total adds `HTTPCode_ELB_503_Count` |
 | podinfo is in `CrashLoopBackOff`, with `OOMKilled` under load | The memory limit is too low for open-model load. 35M crashed at 380 RPS |
@@ -238,4 +238,4 @@ PagerDuty incidents resolve on their own once the alerts clear.
 These pages belong to the `eks-forge` docs agent, and go in the site docs issue:
 - **Get Your First Page** (catalog `docs/monitoring/paging.md`): podinfo's SLOs are measured at the ALB. The page fires about 4 minutes after the first 500, and resolves about 6 minutes after the last one, not about 30.
 - **How SLO Alerting Works:** the SLIs come from the ALB's CloudWatch metrics through YACE, not from podinfo's histogram.
-- **How Paging Works:** SLO pages are grouped per alert (`group_by: [alertname]`), one PagerDuty incident each.
+- **How Paging Works:** alerts are grouped by `[namespace, alertname]` on the root route, so each SLO page is its own PagerDuty incident.

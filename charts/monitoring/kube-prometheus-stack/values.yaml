@@ -345,6 +345,9 @@ kube-prometheus-stack:
             credentials_file: /etc/alertmanager/secrets/alertmanager-slack-bot/bot_token
       route:
         receiver: "unrouted"
+        # Replaces the chart default ["namespace"]. alertname keeps the PagerDuty summary and the
+        # Slack title (CommonAnnotations, CommonLabels) set when alerts without a namespace, like SLO pages, fire together.
+        group_by: ["namespace", "alertname"]
         routes:
           - receiver: "watchdog"
             matchers:
@@ -393,9 +396,7 @@ kube-prometheus-stack:
               - component = "uptime"
               - severity = "warning"
           # pagerduty.enabled adds the PagerDuty page on top of Slack.
-          # One group per alert, so the PagerDuty summary (CommonAnnotations) is never empty.
           - receiver: "slo-critical{{ if .Values.pagerduty.enabled }}-pagerduty{{ end }}"
-            group_by: ["alertname"]
             matchers:
               - component = "slo"
               - severity = "critical"
