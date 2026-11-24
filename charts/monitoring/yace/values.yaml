@@ -119,3 +119,5 @@ yet-another-cloudwatch-exporter:
               statistics: [Sum]
             - name: HTTPCode_ELB_5XX_Count
               statistics: [Sum]
+            - name: HTTPCode_ELB_503_Count
+              statistics: [Sum]

@@ -8,6 +8,7 @@ spec:
   # CloudWatch lags about 3m, so alerts fire and resolve a few minutes late.
   slos:
     # The ALB 5XX has no TargetGroup dimension, so podinfo must stay the only app on its Gateway.
+    # A 503 (no healthy target) is missing from RequestCount, so the total adds it back.
     # A missing 5XX series reads as 0.
     - name: requests-availability
       objective: 99
@@ -18,7 +19,10 @@ spec:
             (sum(sum_over_time(aws_applicationelb_httpcode_target_5_xx_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
             +
             (sum(sum_over_time(aws_applicationelb_httpcode_elb_5_xx_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
-          totalQuery: sum(sum_over_time(aws_applicationelb_request_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}]))
+          totalQuery: |
+            sum(sum_over_time(aws_applicationelb_request_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}]))
+            +
+            (sum(sum_over_time(aws_applicationelb_httpcode_elb_503_count_sum{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}])) or vector(0))
       alerting:
         name: PodinfoAvailabilityBudgetBurn
         labels:
