@@ -34,3 +34,11 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+    # STS GetCallerIdentity, the account ID YACE requires before each scrape. No STS VPC endpoint.
+    # toFQDNs isn't supported with VPC CNI chaining, so this is "world".
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

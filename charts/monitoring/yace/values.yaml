@@ -1,4 +1,4 @@
-# -- Interface endpoint IPs of the CloudWatch (`monitoring`) and Resource Groups Tagging (`tagging`) APIs, the only egress of the exporter. Injected by the catalog via `appParams`.
+# -- Interface endpoint IPs of the CloudWatch (`monitoring`) and Resource Groups Tagging (`tagging`) APIs. Injected by the catalog via `appParams`.
 # @section -- Network
 # @default -- see values.yaml
 vpcEndpointCidrs:
@@ -30,12 +30,14 @@ yet-another-cloudwatch-exporter:
   # @section -- Exporter
   testConnection: false
 
-  # Matches the 60s CloudWatch period, the chart default is 300s.
-  # -- Seconds between two CloudWatch scrapes.
+  # scraping-interval matches the 60s CloudWatch period, the chart default is 300s.
+  # The alias lookup needs IAM ListAccountAliases, unused here.
+  # -- Seconds between two CloudWatch scrapes, and the `account_alias` lookup turned off.
   # @section -- Exporter
   # @default -- see values.yaml
   extraArgs:
     scraping-interval: 60
+    disable-account-alias-lookup: true
 
   # -- Resource requests and limits.
   # @section -- Exporter
