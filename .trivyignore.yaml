@@ -222,3 +222,11 @@ misconfigurations:
       metrics (DCGM_FI_PROF_*: SM, tensor, and DRAM activity), the only
       accurate measure of how busy a GPU is. Every other capability is
       dropped and privilege escalation is disabled.
+  - id: AVD-KSV-0114
+    paths:
+      - "charts/scaling/keda/charts/keda/templates/manager/minimal-rbac.yaml"
+    statement: >
+      The KEDA operator generates and rotates the admission webhooks' TLS
+      certificate, then patches the CA bundle into its own
+      ValidatingWebhookConfiguration. Upstream chart, required for the
+      webhooks to serve, no values option scopes it to that object's name.

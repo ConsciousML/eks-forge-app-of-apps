@@ -33,6 +33,15 @@ spec:
         - ports:
             - port: "9090"
               protocol: TCP
+    # KEDA operator running the Prometheus scaler queries of each ScaledObject.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: keda
+            app.kubernetes.io/name: keda-operator
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
     # Self-monitoring scraping the config-reloader sidecar.
     - fromEndpoints:
         - matchLabels:

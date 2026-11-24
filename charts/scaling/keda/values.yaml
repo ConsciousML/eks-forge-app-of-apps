@@ -1,0 +1,61 @@
+keda:
+  # -- Disabled. `crds-keda` owns the CRDs.
+  # @section -- Install
+  crds:
+    install: false
+
+  # Deployments and StatefulSets are built in. Off drops the get on every resource (KSV-0046).
+  # -- Disabled, so a `ScaledObject` only targets a `Deployment` or `StatefulSet`.
+  # @section -- Install
+  rbac:
+    enabledCustomScaledRefKinds: false
+
+  # No TriggerAuthentication reads a Secret (KSV-0041).
+  # -- Restricts the operator and the metrics API server to Secrets in the `keda` namespace.
+  # @section -- Install
+  # @default -- see values.yaml
+  permissions:
+    operator:
+      restrict:
+        secret: true
+    metricServer:
+      restrict:
+        secret: true
+
+  # From the VPA target recommendations (goldilocks-keda-operator, goldilocks-keda-operator-metrics-apiserver,
+  # and goldilocks-keda-admission-webhooks), revisit once more usage history accumulates.
+  # The chart's default 1 CPU limit stays, a parent chart can't null a subchart default.
+  # -- Resource requests and limits of the operator, metrics API server, and admission webhooks.
+  # @section -- Pods
+  # @default -- see values.yaml
+  resources:
+    operator:
+      requests: { cpu: 15m, memory: 100Mi }
+      limits: { memory: 100Mi }
+    metricServer:
+      requests: { cpu: 15m, memory: 100Mi }
+      limits: { memory: 100Mi }
+    webhooks:
+      requests: { cpu: 15m, memory: 100Mi }
+      limits: { memory: 100Mi }
+
+  # -- Pins every KEDA pod to the `critical` NodePool, with a matching `tolerations` entry.
+  # @section -- Pods
+  # @default -- see values.yaml
+  nodeSelector:
+    karpenter.sh/nodepool: critical
+  tolerations:
+    - key: karpenter.sh/workload-class
+      operator: Equal
+      value: critical
+      effect: NoSchedule
+
+  # Source of the keda.yaml alerts in charts/monitoring/prometheus-rules.
+  # -- Exposes the operator's metrics, scraped through a `ServiceMonitor`.
+  # @section -- Monitoring
+  # @default -- see values.yaml
+  prometheus:
+    operator:
+      enabled: true
+      serviceMonitor:
+        enabled: true

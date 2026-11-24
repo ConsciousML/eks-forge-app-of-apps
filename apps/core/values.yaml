@@ -237,7 +237,7 @@ applications:
     path: charts/monitoring/blackbox-exporter
     destination:
       namespace: monitoring
-    syncWave: 8
+    syncWave: 10
 
   # --- Sloth ---
   # Installed apart from the chart so apps ship a PrometheusServiceLevel next to their manifests.
@@ -457,6 +457,25 @@ applications:
       - charts/gateway-api/gateway/private-gateway-values.yaml
       - charts/gateway-api/httproute/goldilocks-httproute-values.yaml
 
+  # --- KEDA ---
+  # Installed apart from the chart so apps ship a ScaledObject next to their manifests.
+  - name: crds-keda
+    path: manifests/crds/keda
+    destination:
+      namespace: argocd
+    syncWave: -1
+  # ServiceMonitor CRD is Terraform-managed.
+  # Depends on:
+  # - crds-keda
+  # - kube-prometheus-stack (Prometheus scaler queries)
+  # - network-policies-cluster-wide
+  # - See DaemonSets Priority above.
+  - name: keda
+    path: charts/scaling/keda
+    destination:
+      namespace: keda
+    syncWave: 7
+
   # --- Network Policies ---
   # Depends on:
   # - argocd-network-policies, network-policies-kube-system (default-deny.yaml selects
@@ -470,13 +489,15 @@ applications:
   # --- Podinfo ---
   # Depends on:
   # - crds-sloth (podinfo-slo.yaml)
+  # - crds-keda (podinfo-scaledobject.yaml)
+  # - keda (removes finalizer.keda.sh from the ScaledObject on delete)
   # - network-policies-cluster-wide
   # - See DaemonSets Priority above.
   - name: podinfo
     path: manifests/podinfo
     destination:
       namespace: podinfo
-    syncWave: 4
+    syncWave: 8
   # Depends on:
   # - gateway-public
   # - podinfo (the backend Service)
@@ -484,7 +505,7 @@ applications:
     path: charts/gateway-api/httproute
     destination:
       namespace: podinfo
-    syncWave: 7
+    syncWave: 9
     extraValueFiles:
       - charts/gateway-api/gateway/public-gateway-values.yaml
       - charts/gateway-api/httproute/podinfo-httproute-values.yaml

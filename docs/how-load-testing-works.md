@@ -10,7 +10,7 @@ A load test is three files, next to the app they target (see [`manifests/podinfo
 - A suspended `CronJob`, which runs k6 with that script when you trigger it.
 - A `CiliumNetworkPolicy`, which lets the k6 pod reach the app.
 
-They only generate the load. What reacts to it is the app's [HorizontalPodAutoscaler](https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/) (HPA), which adds pods as the load grows, and [Karpenter](https://karpenter.sh/), which adds nodes for them.
+They only generate the load. What reacts to it is the app's [HorizontalPodAutoscaler](https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/) (HPA), which adds pods as the load grows, and [Karpenter](https://karpenter.sh/), which adds nodes for them. podinfo's HPA is created by [KEDA](https://keda.sh/), from a `ScaledObject`.
 
 ```mermaid
 flowchart LR
@@ -42,7 +42,7 @@ The script is a key of a `ConfigMap`, mounted into the k6 pod as a file. The pod
 podinfo's script, in [`manifests/podinfo/k6-loadtest-script.yaml`](../manifests/podinfo/k6-loadtest-script.yaml), uses k6's [`ramping-vus` executor](https://grafana.com/docs/k6/latest/using-k6/scenarios/executors/ramping-vus/). It ramps the number of virtual users up, each requesting podinfo in a loop, then back down, over a few minutes. One run then shows the app scaling up and scaling back down.
 
 ## What the Load Triggers
-podinfo's HPA, in [`manifests/podinfo/podinfo-hpa.yaml`](../manifests/podinfo/podinfo-hpa.yaml), keeps the average CPU usage of podinfo's pods at a target share of their CPU `requests`. It reads the usage from [metrics-server](https://github.com/kubernetes-sigs/metrics-server), and adds or removes pods to get back to that target, between its minimum and maximum number of replicas.
+podinfo's `ScaledObject`, in [`manifests/podinfo/podinfo-scaledobject.yaml`](../manifests/podinfo/podinfo-scaledobject.yaml), keeps the requests per second (RPS) of each podinfo pod at a target. KEDA reads the total RPS from Prometheus and serves it to the HPA it created, which adds or removes pods to get back to that target, between its minimum and maximum number of replicas.
 
 Pods need nodes. When a new pod doesn't fit on the existing `elastic` nodes, Karpenter launches one for it. When the load drops, the HPA removes the pods, and Karpenter removes the nodes left underused.
 
@@ -57,7 +57,7 @@ sequenceDiagram
     participant hpa as HPA
     participant karpenter as Karpenter
     k6->>podinfo: Ramps up the requests
-    podinfo->>podinfo: CPU usage goes above the HPA's target
+    podinfo->>podinfo: RPS per pod goes above the HPA's target
     hpa->>podinfo: Adds pods
     karpenter->>podinfo: Launches a node for the pods that don't fit
     k6->>podinfo: Ramps down the requests
@@ -67,7 +67,7 @@ sequenceDiagram
 
 The `Deployment` sets no `replicas`. The HPA owns that field, and ArgoCD reverts whatever drifts from git: with a number in the manifest, each sync would set the replicas back to it, against the HPA.
 
-The HPA also scales down faster than the default. Kubernetes waits for several minutes of lower usage before it removes pods, and podinfo's HPA shortens that wait, so a run shows the scale down without it. It's a demo setting: a real app usually keeps the default, so a short dip in traffic doesn't remove pods it needs a minute later.
+The HPA also scales down faster than the default. Kubernetes waits for several minutes of lower usage before it removes pods, and podinfo's `ScaledObject` shortens that wait, so a run shows the scale down without it. It's a demo setting: a real app usually keeps the default, so a short dip in traffic doesn't remove pods it needs a minute later.
 
 ## Network Policies
 podinfo's namespace denies all traffic by default, so k6's requests are dropped unless both ends allow them (see [Why Both Ends Need a Rule](/docs/security/how-network-policies-work/#why-both-ends-need-a-rule)). k6 has its own policy, [`manifests/podinfo/k6-loadtest-network-policy.yaml`](../manifests/podinfo/k6-loadtest-network-policy.yaml), which allows egress to podinfo. And [`manifests/podinfo/podinfo-network-policy.yaml`](../manifests/podinfo/podinfo-network-policy.yaml) allows ingress from k6.

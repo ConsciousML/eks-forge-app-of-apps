@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nested-app-crds-keda
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/kedacore/keda
+    path: config/crd/bases
+    # Must match the keda dependency version in charts/scaling/keda/Chart.yaml.
+    targetRevision: v2.21.1
+  syncPolicy:
+    syncOptions:
+      # CRDs are too large for client-side apply's annotation limit.
+      - ServerSideApply=true
+    automated:
+      prune: false
+      selfHeal: true

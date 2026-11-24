@@ -1,0 +1,32 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: podinfo
+spec:
+  scaleTargetRef:
+    name: podinfo
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  # Holds the current replicas while the metric is unreadable, never scales down blind.
+  fallback:
+    failureThreshold: 3
+    replicas: 1
+    behavior: currentReplicasIfHigher
+  advanced:
+    horizontalPodAutoscalerConfig:
+      # Default scale-down stabilization is 5m, too slow to watch the demo unfold.
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 30
+  triggers:
+    # AverageValue divides the total RPS by the replicas, so threshold is per pod.
+    # Probes and scrapes kept (about 0.5 RPS per pod), so the series always exist while
+    # Prometheus scrapes podinfo. An empty result means a lost scrape, not an idle app.
+    - type: prometheus
+      metadata:
+        serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+        query: sum(rate(http_request_duration_seconds_count{namespace="podinfo"}[2m]))
+        # ~70% of one pod's measured plateau (~430 RPS at the 50m CPU limit).
+        threshold: "300"
+        # Errors on an empty result, so the fallback applies instead of reading 0.
+        ignoreNullValues: "false"

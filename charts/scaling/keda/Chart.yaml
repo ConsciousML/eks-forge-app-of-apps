@@ -1,0 +1,9 @@
+apiVersion: v2
+name: keda
+description: KEDA, scales workloads on Prometheus and event-source metrics through ScaledObjects
+type: application
+version: 0.1.0
+dependencies:
+  - name: keda
+    version: 2.21.1
+    repository: https://kedacore.github.io/charts
