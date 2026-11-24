@@ -42,7 +42,7 @@ spec:
           errorQuery: |
             sum(sum_over_time(aws_applicationelb_target_response_time_sample_count{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}]))
             -
-            sum(sum_over_time(aws_applicationelb_target_response_time_tc___0_1_{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}]))
+            sum(sum_over_time(aws_applicationelb_target_response_time_tc__0_1_{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}]))
           totalQuery: sum(sum_over_time(aws_applicationelb_target_response_time_sample_count{tag_eks_forge_io_slo_service="podinfo"}[{{.window}}]))
       alerting:
         name: PodinfoLatencyBudgetBurn

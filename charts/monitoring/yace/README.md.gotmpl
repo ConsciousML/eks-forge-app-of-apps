@@ -18,7 +18,7 @@ One gauge per ALB and statistic, one sample per 60s CloudWatch period, stamped w
 | Metric | CloudWatch Metric and Statistic |
 |--------|---------------------------------|
 | `aws_applicationelb_target_response_time_sample_count` | `TargetResponseTime` `SampleCount` |
-| `aws_applicationelb_target_response_time_tc___0_1_` | `TargetResponseTime` `TC(:0.1)`, samples of 100ms or less |
+| `aws_applicationelb_target_response_time_tc__0_1_` | `TargetResponseTime` `TC(:0.1)`, samples of 100ms or less |
 | `aws_applicationelb_request_count_sum` | `RequestCount` `Sum` |
 | `aws_applicationelb_httpcode_target_5_xx_count_sum` | `HTTPCode_Target_5XX_Count` `Sum` |
 | `aws_applicationelb_httpcode_elb_5_xx_count_sum` | `HTTPCode_ELB_5XX_Count` `Sum` |
