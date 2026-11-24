@@ -1,4 +1,4 @@
-// Local k6 load test against an app's public ALB. See docs/test-slos-under-load.md.
+// Local k6 load test against an app's public ALB. See dev-notes/2026-11-24-podinfo-alb-sli-testing.md.
 // Inputs (-e): BASE_URL (required), RATE req/s (200), DURATION (10m), RTT_MS (0), VUS (200), MAX_VUS (1000).
 import http from 'k6/http';
 import { Counter } from 'k6/metrics';
