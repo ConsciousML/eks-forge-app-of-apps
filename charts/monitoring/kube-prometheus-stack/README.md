@@ -49,7 +49,7 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 |-----|------|---------|-------------|
 | kube-prometheus-stack.prometheus.prometheusSpec.replicas | int | `2` | Prometheus replicas, each with its own PVC. Hard pod anti-affinity, spread across AZs, and a PDB keeping 1 up during disruption. |
 | kube-prometheus-stack.prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues | bool | `false` | Picks up every `ServiceMonitor` regardless of labels. `podMonitorSelectorNilUsesHelmValues` and `ruleSelectorNilUsesHelmValues` do the same for `PodMonitor` and `PrometheusRule`. |
-| kube-prometheus-stack.prometheus.prometheusSpec.tsdb | object | `{"outOfOrderTimeWindow":"10m"}` | Accepts samples up to 10m older than the newest one of a series, for the CloudWatch timestamps of `yace`. |
+| kube-prometheus-stack.prometheus.prometheusSpec.tsdb | object | `{"outOfOrderTimeWindow":"10m"}` | Accepts samples up to 10m older than the newest sample in the TSDB head, for the CloudWatch timestamps of `yace`. Its oldest re-exported point is 7m old (`length` 300s plus `delay` 120s). |
 | kube-prometheus-stack.prometheus.prometheusSpec.storageSpec | object | see values.yaml | `gp3` PVC per replica. PVC retention is set per environment in `values-<env>.yaml`. |
 
 ### Alertmanager
