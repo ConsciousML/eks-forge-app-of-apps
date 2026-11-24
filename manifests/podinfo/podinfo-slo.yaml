@@ -5,7 +5,7 @@ metadata:
 spec:
   service: podinfo
   # Measured at podinfo's ALB, from the per-minute CloudWatch counts yace exports (sum_over_time, never rate).
-  # CloudWatch lags about 3m, so alerts fire and resolve a few minutes late.
+  # CloudWatch lags 3 to 5m, so alerts fire and resolve a few minutes late.
   slos:
     # The ALB 5XX has no TargetGroup dimension, so podinfo must stay the only app on its Gateway.
     # A 503 (no healthy target) is missing from RequestCount, so the total adds it back.
