@@ -336,7 +336,7 @@ kubectl logs -n keda -l app.kubernetes.io/name=keda-operator
 
 If every request fails, a network policy is dropping them. See [Find Dropped Traffic](/docs/security/write-network-policies/#find-dropped-traffic).
 
-During the run, check that no SLO burn-rate alert fires (see [Add an SLO & Page Alert](/docs/monitoring/paging/add-an-slo-and-page-alert/)). If one fires, the app scaled too late: lower the target, raise `minReplicas`, or check what kept new pods from starting. Then run again.
+During the run, check the latency in k6's summary (`http_req_duration`) against the SLO. An SLO measured at the ALB, like podinfo's (see [Measure at the Load Balancer](/docs/monitoring/paging/add-an-slo-and-page-alert/#measure-at-the-load-balancer)), doesn't see this load, since k6 calls the `Service` directly. If the latency breaks the SLO, the app scaled too late: lower the target, raise `minReplicas`, or check what kept new pods from starting. Then run again.
 
 ## Promote to Prod
 
