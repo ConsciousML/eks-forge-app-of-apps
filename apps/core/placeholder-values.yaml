@@ -51,6 +51,7 @@ appParams:
       sqs: ["10.0.0.11"]
       iam: ["10.0.0.12"]
       ssm: ["10.0.0.13"]
+      eks: ["10.0.0.14"]
   loki:
     loki:
       loki:

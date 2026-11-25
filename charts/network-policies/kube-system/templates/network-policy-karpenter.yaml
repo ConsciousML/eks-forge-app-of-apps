@@ -23,10 +23,10 @@ spec:
             - port: "8080"
               protocol: TCP
   egress:
-    # EC2 Fleet API, the SQS interruption queue, IAM (GetInstanceProfile, called by the
-    # EC2NodeClass reconciler), and SSM (amiSelectorTerms alias), via the VPC interface endpoints.
+    # EC2 Fleet API, the SQS interruption queue, IAM (GetInstanceProfile), SSM (amiSelectorTerms
+    # alias), and EKS (DescribeCluster for the cluster CIDR AL2023 needs), via the VPC interface endpoints.
     - toCIDR:
-        {{- range (concat .Values.vpcEndpointCidrs.ec2 .Values.vpcEndpointCidrs.sqs .Values.vpcEndpointCidrs.iam .Values.vpcEndpointCidrs.ssm) }}
+        {{- range (concat .Values.vpcEndpointCidrs.ec2 .Values.vpcEndpointCidrs.sqs .Values.vpcEndpointCidrs.iam .Values.vpcEndpointCidrs.ssm .Values.vpcEndpointCidrs.eks) }}
         - {{ . }}/32
         {{- end }}
       toPorts:
