@@ -6,11 +6,12 @@
   "properties": {
     "vpcEndpointCidrs": {
       "type": "object",
-      "required": ["ec2", "sqs", "iam"],
+      "required": ["ec2", "sqs", "iam", "ssm"],
       "properties": {
         "ec2": { "type": "array", "minItems": 1, "items": { "type": "string" } },
         "sqs": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-        "iam": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+        "iam": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "ssm": { "type": "array", "minItems": 1, "items": { "type": "string" } }
       }
     }
   }
