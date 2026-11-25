@@ -120,7 +120,6 @@ appParams:
             url: "https://placeholder.example.com"
   yace:
     vpcEndpointCidrs:
-      monitoring: ["10.2.0.22"]
       tagging: ["10.2.0.19"]
     yet-another-cloudwatch-exporter:
       region: "us-east-1"
