@@ -194,6 +194,12 @@ kube-prometheus-stack:
       podMonitorSelectorNilUsesHelmValues: false
       ruleSelectorNilUsesHelmValues: false
 
+      # yace stamps samples with CloudWatch's time and re-exports its last 15 points each scrape, so most are older than their series' latest.
+      # -- Accepts samples up to 20m older than the newest sample in the TSDB head. `yace` sends points up to 17m old (`length` 900s plus `delay` 120s).
+      # @section -- Prometheus
+      tsdb:
+        outOfOrderTimeWindow: 20m
+
       # Goldilocks/VPA can't produce a recommendation for this StatefulSet (prometheus-operator
       # owns it, VPA won't target a StatefulSet with a non-scalable parent controller), sized
       # from kubectl top instead
@@ -339,6 +345,9 @@ kube-prometheus-stack:
             credentials_file: /etc/alertmanager/secrets/alertmanager-slack-bot/bot_token
       route:
         receiver: "unrouted"
+        # Replaces the chart default ["namespace"]. alertname keeps the PagerDuty summary and the
+        # Slack title (CommonAnnotations, CommonLabels) set when alerts without a namespace, like SLO pages, fire together.
+        group_by: ["namespace", "alertname"]
         routes:
           - receiver: "watchdog"
             matchers:

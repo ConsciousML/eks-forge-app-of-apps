@@ -50,10 +50,11 @@ spec:
             httpGet:
               path: /readyz
               port: http
+          # Memory: 35M was OOMKilled within a minute at 380 RPS through the ALB (open-model load).
           resources:
             requests:
               cpu: 50m
-              memory: 35M
+              memory: 100M
             limits:
               cpu: 50m
-              memory: 35M
+              memory: 100M

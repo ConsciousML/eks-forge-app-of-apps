@@ -4,3 +4,6 @@ gateway:
 scheme: internet-facing
 targetGroupConfigName: public-defaults
 loadBalancerConfigName: public
+# YACE discovers this ALB for podinfo's SLIs, so podinfo must stay its only app.
+tags:
+  eks-forge.io/slo-service: podinfo

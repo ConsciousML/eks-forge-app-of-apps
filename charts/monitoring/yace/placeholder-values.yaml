@@ -1,0 +1,10 @@
+# Used only by scripts/validate-helm.sh so standalone `helm template` and
+# kubeconform pass. Real values are injected by the catalog
+# (eks-forge-catalog) via appParams. See units/eks/addons/argocd/app_of_apps
+# in that repo.
+vpcEndpointCidrs:
+  monitoring: ["10.2.0.22"]
+  tagging: ["10.2.0.19"]
+yet-another-cloudwatch-exporter:
+  region: "us-east-1"
+  clusterName: "placeholder-cluster"

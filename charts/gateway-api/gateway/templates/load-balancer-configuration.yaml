@@ -7,6 +7,10 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   scheme: {{ .Values.scheme | quote }}
+  {{- with .Values.tags }}
+  tags:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   defaultTargetGroupConfiguration:
     name: {{ .Values.targetGroupConfigName | quote }}
   listenerConfigurations:

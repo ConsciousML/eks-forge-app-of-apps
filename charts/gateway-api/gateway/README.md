@@ -10,12 +10,12 @@ For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 
 - **[templates/gateway.yaml](templates/gateway.yaml)**: the `Gateway`, with an `http` (80) and an `https` (443) listener accepting routes from all namespaces
 - **[templates/http-redirect-httproute.yaml](templates/http-redirect-httproute.yaml)**: `HTTPRoute` on the `http` listener redirecting every host to HTTPS with a 301, so apps are served only over HTTPS
-- **[templates/load-balancer-configuration.yaml](templates/load-balancer-configuration.yaml)**: `certificateArn` becomes the default certificate for the `HTTPS:443` listener
+- **[templates/load-balancer-configuration.yaml](templates/load-balancer-configuration.yaml)**: `certificateArn` becomes the default certificate for the `HTTPS:443` listener, and `tags` the AWS tags of the ALB
 - **[templates/target-group-configuration.yaml](templates/target-group-configuration.yaml)**: `targetType: ip`, so the ALB targets pod IPs directly instead of node ports
 - **[values.yaml](values.yaml)**: empty defaults, see [Values](#values)
 - **[values.schema.json](values.schema.json)**: rejects the values the catalog injects via `appParams` when empty, so a missing injection fails the render
 - **[placeholder-values.yaml](placeholder-values.yaml)**: used only by `scripts/validate-helm.sh`, so standalone `helm template` and kubeconform pass
-- **[public-gateway-values.yaml](public-gateway-values.yaml)**: `gateway-public` instance. Also loaded by every public [`httproute`](../httproute) instance to target this `Gateway`
+- **[public-gateway-values.yaml](public-gateway-values.yaml)**: `gateway-public` instance. Also loaded by every public [`httproute`](../httproute) instance to target this `Gateway`. Its `eks-forge.io/slo-service` tag makes [`yace`](../../monitoring/yace) export the ALB's metrics for podinfo's SLIs
 - **[private-gateway-values.yaml](private-gateway-values.yaml)**: `gateway-private` instance. Also loaded by every private [`httproute`](../httproute) instance to target this `Gateway`
 
 ## Values
@@ -35,6 +35,7 @@ For setup steps, read [How to Expose an App](/docs/networking/expose-an-app/).
 | scheme | string | `""` | ALB scheme, `internet-facing` (public) or `internal` (private). |
 | targetGroupConfigName | string | `""` | `TargetGroupConfiguration` name. |
 | loadBalancerConfigName | string | `""` | `LoadBalancerConfiguration` name. |
+| tags | object | `{}` | AWS tags on the ALB and its related resources. |
 | certificateArn | string | `""` | ACM certificate ARN, the default certificate of the `HTTPS:443` listener. Injected by the catalog via `appParams`. |
 
 ## Sync Waves

@@ -1,0 +1,124 @@
+# -- Interface endpoint IPs of the CloudWatch (`monitoring`) and Resource Groups Tagging (`tagging`) APIs. Injected by the catalog via `appParams`.
+# @section -- Network
+# @default -- see values.yaml
+vpcEndpointCidrs:
+  monitoring: []
+  tagging: []
+
+yet-another-cloudwatch-exporter:
+  # -- AWS region of the ALBs. Injected by the catalog via `appParams`.
+  # @section -- Discovery
+  region: ""
+  # -- EKS cluster name, matched against the `elbv2.k8s.aws/cluster` tag the AWS Load Balancer Controller sets on its ALBs. Injected by the catalog via `appParams`.
+  # @section -- Discovery
+  clusterName: ""
+
+  # TC(:0.1) is undocumented and needs a pinned YACE. Chart 0.39.1 ships v0.62.1, which lacks exportAllDataPoints.
+  # -- YACE image, pinned.
+  # @section -- Exporter
+  # @default -- see values.yaml
+  image:
+    tag: v0.68.0
+
+  # -- Release-independent names. The ServiceAccount must match the catalog's Pod Identity association.
+  # @section -- Exporter
+  fullnameOverride: yace
+  serviceAccount:
+    name: yace
+
+  # -- Upstream `helm test` Pod, off. Its egress isn't allowed by the network policy.
+  # @section -- Exporter
+  testConnection: false
+
+  # scraping-interval matches the 60s CloudWatch period, the chart default is 300s.
+  # The alias lookup needs IAM ListAccountAliases, unused here.
+  # -- Seconds between two CloudWatch scrapes, and the `account_alias` lookup turned off.
+  # @section -- Exporter
+  # @default -- see values.yaml
+  extraArgs:
+    scraping-interval: 60
+    disable-account-alias-lookup: true
+
+  # -- Resource requests and limits.
+  # @section -- Exporter
+  # @default -- see values.yaml
+  resources:
+    requests: { cpu: 10m, memory: 64Mi }
+    limits: { memory: 64Mi }
+
+  # -- Pod-level non-root user, UID and GID 65534.
+  # @section -- Exporter
+  # @default -- see values.yaml
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+  # -- Container-level read-only root filesystem, no privilege escalation, and no capabilities.
+  # @section -- Exporter
+  # @default -- see values.yaml
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+
+  # -- Pins the exporter to the `critical` NodePool, with a matching `tolerations` entry.
+  # @section -- Exporter
+  # @default -- see values.yaml
+  nodeSelector:
+    karpenter.sh/nodepool: critical
+  tolerations:
+    - key: karpenter.sh/workload-class
+      operator: Equal
+      value: critical
+      effect: NoSchedule
+
+  # Explicit CloudWatch timestamps count each 60s period once in sum_over_time, whatever the scrape timing.
+  # -- Prometheus `ServiceMonitor`, scraping every 60s.
+  # @section -- Exporter
+  # @default -- see values.yaml
+  serviceMonitor:
+    enabled: true
+    interval: 60s
+
+  # Discovery job only, static jobs reject TC(:0.1). The ALB must carry eks-forge.io/slo-service.
+  # One ALB per app with an SLO, since HTTPCode_ELB_5XX_Count has no TargetGroup dimension.
+  # length 900 re-exports 15 minutes, so a metric ListMetrics lists up to 15m late keeps its data.
+  # -- YACE config, rendered with `tpl`. One `AWS/ApplicationELB` discovery job over the ALBs tagged `eks-forge.io/slo-service`, exporting the per-minute counts the SLIs sum with `sum_over_time`.
+  # @section -- Discovery
+  # @default -- see values.yaml
+  config: |-
+    apiVersion: v1alpha1
+    discovery:
+      exportedTagsOnMetrics:
+        AWS/ApplicationELB:
+          - eks-forge.io/slo-service
+      jobs:
+        - type: AWS/ApplicationELB
+          regions:
+            - {{ .Values.region }}
+          searchTags:
+            - key: elbv2.k8s.aws/cluster
+              value: ^{{ .Values.clusterName }}$
+            - key: eks-forge.io/slo-service
+              value: .+
+          dimensionNameRequirements:
+            - LoadBalancer
+          period: 60
+          length: 900
+          delay: 120
+          addCloudwatchTimestamp: true
+          exportAllDataPoints: true
+          metrics:
+            - name: TargetResponseTime
+              statistics: [SampleCount, "TC(:0.1)"]
+            - name: RequestCount
+              statistics: [Sum]
+            - name: HTTPCode_Target_5XX_Count
+              statistics: [Sum]
+            - name: HTTPCode_ELB_5XX_Count
+              statistics: [Sum]
+            - name: HTTPCode_ELB_503_Count
+              statistics: [Sum]
