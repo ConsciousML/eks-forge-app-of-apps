@@ -52,8 +52,10 @@ spec:
               protocol: TCP
     # Git over HTTPS or over SSH on ssh.github.com:443 (app_of_apps_repo_url in the catalog's
     # root.hcl), and Helm and OCI chart repos.
-    - toEntities:
-        - world
+    # Public IPs only. RFC1918 is excepted, so the internal ALB stays unreachable.
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
       toPorts:
         - ports:
             - port: "443"

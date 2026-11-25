@@ -1,8 +1,7 @@
-# -- Interface endpoint IPs of the CloudWatch (`monitoring`) and Resource Groups Tagging (`tagging`) APIs. Injected by the catalog via `appParams`.
+# -- Interface endpoint IPs of the Resource Groups Tagging API (`tagging`). Injected by the catalog via `appParams`.
 # @section -- Network
 # @default -- see values.yaml
 vpcEndpointCidrs:
-  monitoring: []
   tagging: []
 
 yet-another-cloudwatch-exporter:

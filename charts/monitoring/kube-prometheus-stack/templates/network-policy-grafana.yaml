@@ -59,8 +59,10 @@ spec:
               protocol: TCP
     # download-dashboards init container, fetching from karpenter.sh and grafana.com
     # (see dashboards in values.yaml).
-    - toEntities:
-        - world
+    # Public IPs only. RFC1918 is excepted, so the internal ALB stays unreachable.
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
       toPorts:
         - ports:
             - port: "443"

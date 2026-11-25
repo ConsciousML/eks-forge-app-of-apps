@@ -1,7 +1,9 @@
-# -- VPC interface endpoint IPs (`ec2`, `sqs`, `iam`) that `ebs-csi-controller` and `karpenter` egress is scoped to. Injected by the catalog via `appParams`.
+# -- VPC interface endpoint IPs (`ec2`, `sqs`, `iam`, `ssm`, and `eks`) that `ebs-csi-controller` and `karpenter` egress is scoped to. Injected by the catalog via `appParams`.
 # @section -- Network Policy
 # @default -- see values.yaml
 vpcEndpointCidrs:
   ec2: []
   sqs: []
   iam: []
+  ssm: []
+  eks: []

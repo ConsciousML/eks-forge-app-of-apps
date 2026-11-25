@@ -8,7 +8,7 @@ For how `CiliumNetworkPolicy` enforcement works, and why these policies live her
 
 ## What's Inside
 
-- **[templates/](templates/)**: one `CiliumNetworkPolicy` per component. `ebs-csi-controller`'s EBS API egress and `karpenter`'s EC2 Fleet, SQS, and IAM egress are scoped via `toCIDR` to `vpcEndpointCidrs`, not `toEntities: world`
+- **[templates/](templates/)**: one `CiliumNetworkPolicy` per component. `ebs-csi-controller`'s EBS API egress and `karpenter`'s EC2 Fleet, SQS, IAM, SSM, and EKS egress are scoped via `toCIDR` to `vpcEndpointCidrs`, not `toEntities: world`
 - **[templates/network-policy-shared-egress.yaml](templates/network-policy-shared-egress.yaml)**: namespace-wide kube-apiserver and coredns egress for every pod in `kube-system`, including `aws-load-balancer-controller` (deployed by [`aws-lbc`](../../aws-lbc)) and the catalog's `cilium-cep-restart` hook `Job`
 - **[values.yaml](values.yaml)**: see [Values](#values)
 - **[values.schema.json](values.schema.json)**: rejects the values the catalog injects via `appParams` when empty, so a missing injection fails the render

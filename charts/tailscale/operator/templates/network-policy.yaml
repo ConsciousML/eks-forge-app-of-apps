@@ -9,24 +9,30 @@ spec:
       app: operator
   egress:
     # Tailscale control plane (coordination server) and DERP relays: external HTTPS
-    # endpoints outside the VPC, so it's "world" rather than a Cilium identity.
-    - toEntities:
-        - world
+    # endpoints outside the VPC.
+    # Public IPs only. RFC1918 is excepted, so the internal ALB stays unreachable.
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
       toPorts:
         - ports:
             - port: "443"
               protocol: TCP
     # STUN, for NAT traversal / DERP discovery.
-    - toEntities:
-        - world
+    # Public IPs only. RFC1918 is excepted, so the internal ALB stays unreachable.
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
       toPorts:
         - ports:
             - port: "3478"
               protocol: UDP
     # DERP netcheck HTTP probing (also hits the EC2 instance metadata service, which isn't a
-    # Cilium-managed endpoint so it resolves to "world" here rather than "host").
-    - toEntities:
-        - world
+    # Cilium-managed endpoint and isn't in RFC1918).
+    # Public IPs only. RFC1918 is excepted, so the internal ALB stays unreachable.
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
       toPorts:
         - ports:
             - port: "80"

@@ -57,8 +57,10 @@ spec:
             - port: "9094"
               protocol: UDP
     # Slack and PagerDuty notifications, see config.global.slack_api_url and pagerduty.eventsUrl in values.yaml.
-    - toEntities:
-        - world
+    # Public IPs only. RFC1918 is excepted, so the internal ALB stays unreachable.
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
       toPorts:
         - ports:
             - port: "443"

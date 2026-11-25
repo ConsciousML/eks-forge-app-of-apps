@@ -50,6 +50,8 @@ appParams:
       ec2: ["10.0.0.10"]
       sqs: ["10.0.0.11"]
       iam: ["10.0.0.12"]
+      ssm: ["10.0.0.13"]
+      eks: ["10.0.0.14"]
   loki:
     loki:
       loki:
@@ -120,7 +122,6 @@ appParams:
             url: "https://placeholder.example.com"
   yace:
     vpcEndpointCidrs:
-      monitoring: ["10.2.0.22"]
       tagging: ["10.2.0.19"]
     yet-another-cloudwatch-exporter:
       region: "us-east-1"

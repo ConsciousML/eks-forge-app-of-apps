@@ -25,19 +25,22 @@ spec:
             - port: "5000"
               protocol: TCP
   egress:
-    # CloudWatch and Resource Groups Tagging APIs, via the VPC interface endpoints.
+    # Resource Groups Tagging API, via the VPC interface endpoint aws-lbc requires.
+    # Private DNS resolves it to the endpoint IPs, which the public egress rule below excepts.
     - toCIDR:
-        {{- range concat .Values.vpcEndpointCidrs.monitoring .Values.vpcEndpointCidrs.tagging }}
+        {{- range .Values.vpcEndpointCidrs.tagging }}
         - {{ . }}/32
         {{- end }}
       toPorts:
         - ports:
             - port: "443"
               protocol: TCP
-    # STS GetCallerIdentity, the account ID YACE requires before each scrape. No STS VPC endpoint.
-    # toFQDNs isn't supported with VPC CNI chaining, so this is "world".
-    - toEntities:
-        - world
+    # CloudWatch, and STS GetCallerIdentity for the account ID YACE requires before each scrape.
+    # Neither has a VPC endpoint, since YACE isn't critical (see pipelines/network.hcl in the catalog).
+    # Public IPs only. RFC1918 is excepted, so the internal ALB stays unreachable.
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
       toPorts:
         - ports:
             - port: "443"

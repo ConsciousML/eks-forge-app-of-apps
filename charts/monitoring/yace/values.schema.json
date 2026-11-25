@@ -6,9 +6,8 @@
   "properties": {
     "vpcEndpointCidrs": {
       "type": "object",
-      "required": ["monitoring", "tagging"],
+      "required": ["tagging"],
       "properties": {
-        "monitoring": { "type": "array", "minItems": 1, "items": { "type": "string" } },
         "tagging": { "type": "array", "minItems": 1, "items": { "type": "string" } }
       }
     },
