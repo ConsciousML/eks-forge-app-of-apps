@@ -3,6 +3,10 @@ kind: CiliumNetworkPolicy
 metadata:
   name: argocd-shared-egress
   namespace: argocd
+  annotations:
+    # Before the per-component policies. Enforced first, they cut the controller's kube-apiserver
+    # egress before it can apply this one.
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   # Lives here, not cluster-wide/, so argocd never depends on network-policies-cluster-wide for
   # DNS/API access. ArgoCD manages that Application too: a dependency risks a lockout it can't
