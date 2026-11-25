@@ -89,7 +89,7 @@ To measure your app's SLIs at the ALB the same way:
 - **Count `502` and `504` in an availability SLO.** The ALB generates them itself, so they're missing from `TargetResponseTime`, and a latency SLO never sees them.
 - **Page on a full outage separately.** Probes keep failing even with no traffic, which leaves the SLIs without data. Add a page alert on the blackbox probe of your app's URL, as in [`podinfo-down.yaml`](../manifests/podinfo/podinfo-down.yaml).
 
-CloudWatch data reaches Prometheus 3 to 5 minutes late, so the alerts fire and resolve a few minutes late. After a period without `5xx`, the first one can take a few more minutes to show up, while `yace` discovers the new metric (AWS allows up to 15 minutes).
+CloudWatch data reaches Prometheus 3 to 5 minutes late, so the alerts fire and resolve a few minutes late. The first `5xx` an ALB ever returns can take up to 15 minutes more to show up, while `yace` discovers the new metric. `yace` re-exports 15 minutes of data, so those errors still count, but the 5-minute alert windows already evaluated never see them: a short burst then fires only the ticket alert.
 
 For the metrics `yace` exports, see the [`yace` Helm Chart](/docs/reference/helm_charts/monitoring/yace/) reference.
 

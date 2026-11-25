@@ -194,11 +194,11 @@ kube-prometheus-stack:
       podMonitorSelectorNilUsesHelmValues: false
       ruleSelectorNilUsesHelmValues: false
 
-      # yace re-exports the last 5 CloudWatch points on each scrape (exportAllDataPoints).
-      # -- Accepts samples up to 10m older than the newest sample in the TSDB head, for the CloudWatch timestamps of `yace`. Its oldest re-exported point is 7m old (`length` 300s plus `delay` 120s).
+      # yace stamps samples with CloudWatch's time and re-exports its last 15 points each scrape, so most are older than their series' latest.
+      # -- Accepts samples up to 20m older than the newest sample in the TSDB head. `yace` sends points up to 17m old (`length` 900s plus `delay` 120s).
       # @section -- Prometheus
       tsdb:
-        outOfOrderTimeWindow: 10m
+        outOfOrderTimeWindow: 20m
 
       # Goldilocks/VPA can't produce a recommendation for this StatefulSet (prometheus-operator
       # owns it, VPA won't target a StatefulSet with a non-scalable parent controller), sized

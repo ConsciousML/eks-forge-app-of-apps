@@ -85,6 +85,7 @@ yet-another-cloudwatch-exporter:
 
   # Discovery job only, static jobs reject TC(:0.1). The ALB must carry eks-forge.io/slo-service.
   # One ALB per app with an SLO, since HTTPCode_ELB_5XX_Count has no TargetGroup dimension.
+  # length 900 re-exports 15 minutes, so a metric ListMetrics lists up to 15m late keeps its data.
   # -- YACE config, rendered with `tpl`. One `AWS/ApplicationELB` discovery job over the ALBs tagged `eks-forge.io/slo-service`, exporting the per-minute counts the SLIs sum with `sum_over_time`.
   # @section -- Discovery
   # @default -- see values.yaml
@@ -106,7 +107,7 @@ yet-another-cloudwatch-exporter:
           dimensionNameRequirements:
             - LoadBalancer
           period: 60
-          length: 300
+          length: 900
           delay: 120
           addCloudwatchTimestamp: true
           exportAllDataPoints: true
