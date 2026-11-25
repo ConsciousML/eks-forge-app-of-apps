@@ -32,7 +32,7 @@ CloudWatch publishes the 5XX metrics only once they're nonzero, and YACE discove
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| vpcEndpointCidrs | object | see values.yaml | Interface endpoint IPs of the CloudWatch (`monitoring`) and Resource Groups Tagging (`tagging`) APIs. Injected by the catalog via `appParams`. |
+| vpcEndpointCidrs | object | see values.yaml | Interface endpoint IPs of the Resource Groups Tagging API (`tagging`). Injected by the catalog via `appParams`. |
 
 ### Discovery
 

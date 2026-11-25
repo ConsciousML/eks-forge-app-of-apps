@@ -16,8 +16,10 @@ spec:
             - port: "8081"
               protocol: TCP
     # SCM/PR generators calling out to the Git provider's API (e.g. GitHub).
-    - toEntities:
-        - world
+    # Public IPs only. RFC1918 is excepted, so the internal ALB stays unreachable.
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
       toPorts:
         - ports:
             - port: "443"

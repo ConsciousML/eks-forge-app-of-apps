@@ -79,9 +79,11 @@ spec:
               protocol: TCP
     # chunks/ruler S3 buckets, via the VPC's S3 gateway endpoint. A gateway endpoint has
     # no ENI/IP to scope a toCIDR rule to (it's a route table prefix-list entry), so this
-    # still shows as "world" to Cilium even though the traffic never hits the NAT gateway.
-    - toEntities:
-        - world
+    # targets S3's public IPs even though the traffic never hits the NAT gateway.
+    # Public IPs only. RFC1918 is excepted, so the internal ALB stays unreachable.
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
       toPorts:
         - ports:
             - port: "443"

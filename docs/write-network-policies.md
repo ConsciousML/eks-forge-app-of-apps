@@ -67,7 +67,7 @@ For **Both pods**, write both rules at once. Otherwise, Hubble only shows the se
 | The kubelet, probing your pod | Your pod | N/A | [`fromEntities: [host]`](https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based) | [`podinfo-network-policy.yaml`](../manifests/podinfo/podinfo-network-policy.yaml) |
 | A load balancer, forwarding to your pod | Your pod | N/A | [`fromEntities: [world]`](https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based) | [`podinfo-network-policy.yaml`](../manifests/podinfo/podinfo-network-policy.yaml) |
 | An AWS API with a VPC endpoint | Your pod | [`toCIDR`](https://docs.cilium.io/en/stable/security/policy/layer3/#cidr-based) on `vpcEndpointCidrs`, see [Allow an AWS API](#allow-an-aws-api) | N/A | [`charts/external-dns/templates/network-policy.yaml`](../charts/external-dns/templates/network-policy.yaml) |
-| S3, or anything outside AWS | Your pod | [`toEntities: [world]`](https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based) | N/A | [`network-policy-single-binary.yaml`](../charts/monitoring/loki/templates/network-policy-single-binary.yaml) |
+| S3, or anything outside AWS | Your pod | [`toCIDRSet`](https://docs.cilium.io/en/stable/security/policy/layer3/#cidr-based) on `0.0.0.0/0`, with RFC1918 in `except` so the VPC (and the internal ALB) stays unreachable | N/A | [`network-policy-single-binary.yaml`](../charts/monitoring/loki/templates/network-policy-single-binary.yaml) |
 
 These are the selectors EKS Forge uses today, not every one Cilium offers. For a peer they don't fit, see Cilium's [Layer 3](https://docs.cilium.io/en/stable/security/policy/layer3/) and [Layer 4](https://docs.cilium.io/en/stable/security/policy/layer4/) policy docs.
 
@@ -181,6 +181,8 @@ If no file matches, the policy is named after its Helm release (`{{ .Release.Nam
 ### Allow an AWS API
 
 For an AWS API with a VPC endpoint, the pod reaches the endpoint's fixed IPs, which the catalog passes to your chart in `vpcEndpointCidrs`.
+
+Only a critical pod needs an endpoint: one whose IAM role can read secrets, change DNS, launch compute, pass IAM roles, or change network exposure (load balancers, security groups). Any other pod reaches AWS APIs like anything outside AWS (see the table above). If the API already has an endpoint, its private DNS resolves to the endpoint IPs for every pod, so allow them with `toCIDR` as below, even for a non-critical pod.
 
 If the service has no endpoint yet (it isn't in `endpoint_host_offsets` in the catalog's [`pipelines/network.hcl`](https://github.com/ConsciousML/eks-forge-catalog/blob/main/pipelines/network.hcl)), add one first by following [Add a VPC Endpoint](/docs/iac/add-a-vpc-endpoint/).
 
