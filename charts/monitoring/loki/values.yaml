@@ -110,7 +110,7 @@ loki:
       minAvailable: 2
 
     # CPU sized to observed steady-state WAL checkpoint load (~1.1-1.2 cores per pod).
-    # -- Resource requests and limits. The caches, the gateway, the canary, and the sidecar set their own.
+    # -- Resource requests and limits. The caches, the gateway, and the canary set their own.
     # @section -- Single Binary
     # @default -- see values.yaml
     resources:
@@ -237,13 +237,13 @@ loki:
         value: "true"
         effect: NoSchedule
 
+  # No loki_rule ConfigMap exists. Loki mixin alerts go through PrometheusRule.
+  # -- Disables the rules sidecar, which would need cluster-wide `configmaps` and `secrets` reads.
+  # @section -- RBAC
+  # @default -- see values.yaml
   sidecar:
-    resources:
-      requests:
-        cpu: 50m
-        memory: 249M
-      limits:
-        memory: 249M
+    rules:
+      enabled: false
 
   # Other deployment modes, unused in Monolithic mode. Some (write/read/backend) default to
   # replicas: 3 regardless of deploymentMode, and the chart refuses to render if both

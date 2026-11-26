@@ -156,6 +156,38 @@ alloy:
       capabilities:
         drop: ["ALL"]
 
+  rbac:
+    # Upstream default minus the remote.kubernetes.* configmaps and secrets rule, unused here.
+    # Recheck on chart bumps.
+    # -- ClusterRole rules. The upstream default without `configmaps` and `secrets`, so Alloy can't read Secrets.
+    # @section -- RBAC
+    # @default -- see values.yaml
+    rules:
+      - apiGroups: ["", "discovery.k8s.io", "networking.k8s.io"]
+        resources: ["endpoints", "endpointslices", "ingresses", "pods", "services"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: [""]
+        resources: ["pods", "pods/log", "namespaces"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["monitoring.grafana.com"]
+        resources: ["podlogs"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["monitoring.coreos.com"]
+        resources: ["prometheusrules"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["monitoring.coreos.com"]
+        resources: ["alertmanagerconfigs"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["monitoring.coreos.com"]
+        resources: ["podmonitors", "servicemonitors", "probes", "scrapeconfigs"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: [""]
+        resources: ["events"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["apps", "extensions"]
+        resources: ["replicasets"]
+        verbs: ["get", "list", "watch"]
+
   global:
     # Pod-level securityContext (rendered from global, not controller, despite living
     # alongside the DaemonSet spec).

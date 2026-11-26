@@ -17,6 +17,10 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 
 {{ template "chart.valuesSection" . }}
 
+## Secret Access
+
+A component gets Secret read access through the Kubernetes API only if it manages Secrets. Loki can't read Secrets. An app reads its `Secret` as a volume mount or an env var instead, as in [Pass a Secret to an App](/docs/applications/pass-a-secret-to-an-app/).
+
 ## Upstream Dependencies
 
 - **[`units/eks/addons/loki`](https://github.com/ConsciousML/eks-forge-catalog/tree/main/units/eks/addons/loki)** (catalog): provisions the two S3 buckets `loki.loki.storage.bucketNames` points at, and the Pod Identity association the `releaseName` in [`apps/core/values.yaml`](../../../apps/core/values.yaml) must match

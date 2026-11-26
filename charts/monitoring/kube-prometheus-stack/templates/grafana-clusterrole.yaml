@@ -1,0 +1,10 @@
+# Replaces the grafana chart's ClusterRole, which always grants secrets with configmaps.
+# Name must match grafana.rbac.useExistingClusterRole in values.yaml.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: grafana-configmaps
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]

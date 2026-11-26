@@ -42,6 +42,38 @@ kube-prometheus-stack:
         memory: 24M
 
   kube-state-metrics:
+    # Upstream default minus secrets. Recheck on chart bumps.
+    # -- Upstream default collectors without `secrets`, so kube-state-metrics can't list Secrets.
+    # @section -- RBAC
+    # @default -- see values.yaml
+    collectors:
+      - certificatesigningrequests
+      - configmaps
+      - cronjobs
+      - daemonsets
+      - deployments
+      - endpointslices
+      - horizontalpodautoscalers
+      - ingresses
+      - jobs
+      - leases
+      - limitranges
+      - mutatingwebhookconfigurations
+      - namespaces
+      - networkpolicies
+      - nodes
+      - persistentvolumeclaims
+      - persistentvolumes
+      - poddisruptionbudgets
+      - pods
+      - replicasets
+      - replicationcontrollers
+      - resourcequotas
+      - services
+      - statefulsets
+      - storageclasses
+      - validatingwebhookconfigurations
+      - volumeattachments
     resources:
       requests:
         cpu: 11m
@@ -480,6 +512,13 @@ kube-prometheus-stack:
     persistence:
       enabled: false
 
+    # The chart's own ClusterRole always grants secrets. Secrets reach Grafana as env vars or
+    # mounts, never through the API (see docs/pass-a-secret-to-an-app.md).
+    rbac:
+      # -- Binds `templates/grafana-clusterrole.yaml` (`configmaps` only) instead of the chart's ClusterRole, which also grants `secrets`.
+      # @section -- RBAC
+      useExistingClusterRole: grafana-configmaps
+
     resources:
       requests:
         cpu: 23m
@@ -519,6 +558,7 @@ kube-prometheus-stack:
       # boot-time provisioning scan is silently never loaded until the pod restarts and wins
       # the sidecar-vs-grafana startup race by luck.
       dashboards:
+        resource: configmap # matches templates/grafana-clusterrole.yaml
         # Lets sidecar-discovered ConfigMaps opt into a folder via grafana_folder annotation.
         folderAnnotation: grafana_folder
         provider:
@@ -526,6 +566,7 @@ kube-prometheus-stack:
         env:
           REQ_USERNAME: admin
       datasources:
+        resource: configmap # matches templates/grafana-clusterrole.yaml
         env:
           REQ_USERNAME: admin
 

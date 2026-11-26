@@ -1,22 +1,4 @@
 misconfigurations:
-  - id: AVD-KSV-0041
-    paths:
-      - "charts/monitoring/loki/charts/loki/templates/backend/clusterrole.yaml"
-    statement: >
-      Grants cluster-wide get/list/watch on Secrets and ConfigMaps, gated by
-      sidecar.rules.enabled for Loki's rule-sync sidecar (loki-sc-rules,
-      running in this deployment). ConfigMaps and Secrets are granted together
-      by the same toggle, not separately scopable. Deferred, revisit if needed.
-  - id: AVD-KSV-0041
-    paths:
-      - "charts/monitoring/alloy/charts/alloy/templates/rbac.yaml"
-    statement: >
-      Grants cluster-wide get/list/watch on Secrets, bundled by the chart under
-      rbac.rules for the remote.kubernetes.* components. This deployment's config
-      doesn't use those components (no basic_auth or other Secret-sourced value),
-      so the access is unused today. rbac.rules/clusterRules are overridable, but
-      left as the chart default rather than forked, revisit if this proves to
-      matter.
   - id: AVD-KSV-0056
     paths:
       - "charts/tailscale/operator/charts/tailscale-operator/templates/operator-rbac.yaml"
@@ -68,16 +50,6 @@ misconfigurations:
       mount exposed via values to relocate that write path, so the root
       filesystem cannot be made read-only without breaking the
       container on startup.
-  - id: AVD-KSV-0041
-    paths:
-      - "charts/monitoring/kube-prometheus-stack/charts/kube-prometheus-stack/charts/grafana/templates/clusterrole.yaml"
-    statement: >
-      Backs the sidecar.datasources watch (needed for the default
-      Prometheus and Alertmanager datasources) and is kept cluster-wide
-      rather than scoped to Grafana's own namespace, so future addons
-      can self-register dashboards via a grafana_dashboard-labeled
-      ConfigMap in their own namespace without further RBAC changes.
-      Read-only (get/watch/list), not write access.
   - id: AVD-KSV-0014
     paths:
       - "charts/monitoring/kube-prometheus-stack/charts/kube-prometheus-stack/charts/grafana/templates/deployment.yaml"
@@ -90,15 +62,6 @@ misconfigurations:
       this exception covers only the main grafana container until its
       temp path is verified safe to redirect into an existing mounted
       emptyDir.
-  - id: AVD-KSV-0041
-    paths:
-      - "charts/monitoring/kube-prometheus-stack/charts/kube-prometheus-stack/charts/kube-state-metrics/templates/role.yaml"
-    statement: >
-      The 'secrets' collector is kept enabled (upstream default) so
-      Secret metadata (count, age, type, labels) stays available for
-      dashboards and alerts. Read-only (list/watch), never exposes
-      secret values, and disabling it would remove that capability
-      rather than just narrowing scope.
   - id: AVD-KSV-0041
     paths:
       - "charts/external-secrets-operator/operator/charts/external-secrets/templates/rbac.yaml"
