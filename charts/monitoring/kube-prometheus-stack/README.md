@@ -9,6 +9,7 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 ## What's Inside
 
 - **`templates/network-policy-*.yaml`**: one `CiliumNetworkPolicy` per component ([prometheus](templates/network-policy-prometheus.yaml), [alertmanager](templates/network-policy-alertmanager.yaml), [grafana](templates/network-policy-grafana.yaml), [operator](templates/network-policy-operator.yaml), [kube-state-metrics](templates/network-policy-kube-state-metrics.yaml))
+- **[templates/grafana-clusterrole.yaml](templates/grafana-clusterrole.yaml)**: Grafana's `ClusterRole`, `configmaps` only
 - **[values.yaml](values.yaml)**: see [Values](#values)
 - **[values.schema.json](values.schema.json)**: rejects the values the catalog injects via `appParams` when empty, so a missing injection fails the render
 - **[placeholder-values.yaml](placeholder-values.yaml)**: used only by `scripts/validate-helm.sh`, so standalone `helm template` and kubeconform pass
@@ -28,6 +29,13 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 | kube-prometheus-stack.pagerduty.eventsUrl | string | `""` | Events API v2 endpoint of the PagerDuty account's region. Injected by the catalog via `appParams`. |
 | kube-prometheus-stack.crds.enabled | bool | `false` | Disabled, the catalog's `prometheus_operator_crds` unit installs the CRDs before ArgoCD syncs. |
 | kube-prometheus-stack.kubeEtcd | object | see values.yaml | Disabled with `kubeScheduler` and `kubeControllerManager`, AWS-managed on EKS. |
+
+### RBAC
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| kube-prometheus-stack.kube-state-metrics.collectors | list | see values.yaml | Upstream default collectors without `secrets`, so kube-state-metrics can't list Secrets. |
+| kube-prometheus-stack.grafana.rbac.useExistingClusterRole | string | `"grafana-configmaps"` | Binds `templates/grafana-clusterrole.yaml` (`configmaps` only) instead of the chart's ClusterRole, which also grants `secrets`. |
 
 ### Scheduling
 
@@ -71,6 +79,10 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 ## Resource Names
 
 `fullnameOverride` only names this chart's own resources: the `prometheus`, `alertmanager`, and operator objects. Grafana, `kube-state-metrics`, and `node-exporter` are bundled subcharts that derive their resource names from the Helm release name instead. Anything referencing those names, like an [`httproute`](../../gateway-api/httproute) `backendRef`, must match `tool.helm.releaseName` in `apps/core/values.yaml`, or it silently points at the wrong Service.
+
+## Secret Access
+
+A component gets Secret read access through the Kubernetes API only if it manages Secrets. Grafana and kube-state-metrics can't read Secrets. An app reads its `Secret` as a volume mount or an env var instead, as in [Pass a Secret to an App](/docs/applications/pass-a-secret-to-an-app/).
 
 ## Upstream Dependencies
 

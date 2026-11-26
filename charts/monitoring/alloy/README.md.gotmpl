@@ -11,6 +11,10 @@ The [`alloy` chart](./) deploys [Grafana Alloy](https://grafana.com/docs/alloy/l
 
 {{ template "chart.valuesSection" . }}
 
+## Secret Access
+
+A component gets Secret read access through the Kubernetes API only if it manages Secrets. Alloy can't read Secrets. An app reads its `Secret` as a volume mount or an env var instead, as in [Pass a Secret to an App](/docs/applications/pass-a-secret-to-an-app/).
+
 ## Upstream Dependencies
 
 - **[`loki`](../loki/)**: receives logs at `loki-gateway`. Alloy retries failed writes, so Loki doesn't need to be up first

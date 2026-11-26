@@ -92,6 +92,25 @@ kube-prometheus-stack:
         - alertmanager-slack-bot
 ```
 
+Mount the `Secret` as a volume or pass it in as an env var. Don't have your app read it through the Kubernetes API. Only components that manage Secrets get that access, so Grafana, Loki, Alloy, and kube-state-metrics can't read Secrets.
+
+To give a Grafana datasource a credential, sync the `Secret` into `monitoring`, then pass it to Grafana as an env var and reference it with `$__env{...}`. For example, a hypothetical datasource with a password, in [`charts/monitoring/kube-prometheus-stack/values.yaml`](../charts/monitoring/kube-prometheus-stack/values.yaml):
+```yaml
+kube-prometheus-stack:
+  ...
+  grafana:
+    envValueFrom:
+      MY_DB_PASSWORD:
+        secretKeyRef:
+          name: my-db
+          key: password
+    additionalDataSources:
+      - name: MyDB
+        ...
+        secureJsonData:
+          password: $__env{MY_DB_PASSWORD}
+```
+
 If your app needs the `Secret` before it starts (e.g. to mount it or to set a password on first boot), add `<app>-secrets` to its `# Depends on:` comment in [`apps/core/values.yaml`](../apps/core/values.yaml), and recompute its `syncWave` (see [Set the Sync Wave](/docs/applications/add-edit-or-remove-an-app/#set-the-sync-wave)). For example, `kube-prometheus-stack` runs after `alertmanager-secrets` (wave `5`), at wave `6`:
 ```yaml
   # Depends on:
