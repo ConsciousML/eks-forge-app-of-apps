@@ -8,7 +8,7 @@ The [`dcgm-exporter` chart](./) deploys the [DCGM exporter](https://github.com/N
 
 - **[templates/network-policy.yaml](templates/network-policy.yaml)**: the exporter's `CiliumNetworkPolicy`
 - **[templates/dashboard.yaml](templates/dashboard.yaml)**: a `ConfigMap` holding the **NVIDIA DCGM Exporter Dashboard**, loaded into Grafana's **GPU** folder by its dashboard sidecar
-- **[dashboards/dcgm-exporter.json](dashboards/dcgm-exporter.json)**: the dashboard, from [grafana.com](https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/), with its datasource input set to `Prometheus`
+- **[dashboards/dcgm-exporter.json](dashboards/dcgm-exporter.json)**: the dashboard, copied unchanged from the upstream [`grafana/dcgm-exporter-dashboard.json`](https://github.com/NVIDIA/dcgm-exporter/blob/4.9.0/grafana/dcgm-exporter-dashboard.json) at the tag matching the chart version, since metric names change between exporter versions
 - **[values.yaml](values.yaml)**: see [Values](#values)
 
 ## Values
