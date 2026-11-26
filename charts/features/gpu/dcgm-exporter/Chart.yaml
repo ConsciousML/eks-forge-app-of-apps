@@ -5,5 +5,7 @@ type: application
 version: 0.1.0
 dependencies:
   - name: dcgm-exporter
+    # Keep dashboards/dcgm-exporter.json copied from the upstream tag matching
+    # this version, since a mismatch empties the panels without an error
     version: 4.9.0
     repository: https://nvidia.github.io/dcgm-exporter/helm-charts
