@@ -46,7 +46,7 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 | loki.singleBinary.replicas | int | `3` | `singleBinary` StatefulSet replicas. |
 | loki.singleBinary.topologySpreadConstraints | list | see values.yaml | Spreads replicas across AZs, `DoNotSchedule` when unsatisfiable. |
 | loki.singleBinary.podDisruptionBudget.minAvailable | int | `2` | Keeps a majority up during voluntary disruption. |
-| loki.singleBinary.resources | object | see values.yaml | Resource requests and limits. The caches, the gateway, the canary, and the sidecar set their own. |
+| loki.singleBinary.resources | object | see values.yaml | Resource requests and limits. The caches, the gateway, and the canary set their own. |
 | loki.singleBinary.nodeSelector | object | see values.yaml | Pins pods to the `critical` NodePool, with a matching `tolerations` entry. The caches and the gateway set the same. |
 | loki.singleBinary.persistence.size | string | `"30Gi"` | PVC size per replica. PVC deletion is set per environment in `values-<env>.yaml`. |
 
@@ -61,6 +61,16 @@ For per-environment overrides, read [Configure an App per Environment](/docs/app
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | loki.lokiCanary.priorityClassName | string | `"daemonset-critical"` | Lets a canary pod preempt a lower-priority one on a full node. It tolerates both Karpenter NodePool taints and the MNG taint, so every node runs one. |
+
+### RBAC
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| loki.sidecar | object | see values.yaml | Disables the rules sidecar, which would need cluster-wide `configmaps` and `secrets` reads. |
+
+## Secret Access
+
+A component gets Secret read access through the Kubernetes API only if it manages Secrets. Loki can't read Secrets. An app reads its `Secret` as a volume mount or an env var instead, as in [Pass a Secret to an App](/docs/applications/pass-a-secret-to-an-app/).
 
 ## Upstream Dependencies
 

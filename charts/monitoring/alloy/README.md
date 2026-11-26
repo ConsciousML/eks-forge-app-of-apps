@@ -26,6 +26,12 @@ The [`alloy` chart](./) deploys [Grafana Alloy](https://grafana.com/docs/alloy/l
 |-----|------|---------|-------------|
 | alloy.configReloader | object | see values.yaml | Config reloader sidecar resources, and a non-root `securityContext` (UID and GID 65534). |
 
+### RBAC
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| alloy.rbac.rules | list | see values.yaml | ClusterRole rules. The upstream default without `configmaps` and `secrets`, so Alloy can't read Secrets. |
+
 ### DaemonSet
 
 | Key | Type | Default | Description |
@@ -35,6 +41,10 @@ The [`alloy` chart](./) deploys [Grafana Alloy](https://grafana.com/docs/alloy/l
 | alloy.controller.priorityClassName | string | `"daemonset-critical"` | Lets a pod preempt a lower-priority one on a full node. |
 | alloy.controller.volumes | object | see values.yaml | The `alloy-data` `emptyDir`. |
 | alloy.controller.tolerations | list | see values.yaml | Tolerates both Karpenter NodePool taints and the MNG taint, so every node runs a pod. |
+
+## Secret Access
+
+A component gets Secret read access through the Kubernetes API only if it manages Secrets. Alloy can't read Secrets. An app reads its `Secret` as a volume mount or an env var instead, as in [Pass a Secret to an App](/docs/applications/pass-a-secret-to-an-app/).
 
 ## Upstream Dependencies
 
