@@ -9,4 +9,4 @@ For how `CiliumNetworkPolicy` enforcement works, and why these policies live her
 ## What's Inside
 
 - **[network-policy-*.yaml](./)**: one `CiliumNetworkPolicy` per ArgoCD component (`application-controller`, `applicationset-controller`, `dex-server`, `redis`, `repo-server`, and `server`)
-- **[network-policy-shared-egress.yaml](network-policy-shared-egress.yaml)**: namespace-wide kube-apiserver and kube-dns egress for every pod in `argocd`. Synced in wave `-1`, before the per-component policies, so the controller never loses kube-apiserver access mid-sync
+- **[network-policy-shared-egress.yaml](network-policy-shared-egress.yaml)**: kube-apiserver and kube-dns egress for every pod in `argocd` except the application controller. The controller's full egress lives only in `network-policy-application-controller.yaml`, so no apply order leaves it with a partial allow list

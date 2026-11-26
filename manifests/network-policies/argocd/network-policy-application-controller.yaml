@@ -24,7 +24,25 @@ spec:
         - ports:
             - port: "8082"
               protocol: TCP
+  # Full egress, kube-dns and kube-apiserver included. network-policy-shared-egress.yaml excludes
+  # the controller.
   egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: argocd-repo-server

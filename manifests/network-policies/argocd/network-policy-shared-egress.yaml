@@ -3,15 +3,17 @@ kind: CiliumNetworkPolicy
 metadata:
   name: argocd-shared-egress
   namespace: argocd
-  annotations:
-    # Before the per-component policies. Enforced first, they cut the controller's kube-apiserver
-    # egress before it can apply this one.
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
   # Lives here, not cluster-wide/, so argocd never depends on network-policies-cluster-wide for
   # DNS/API access. ArgoCD manages that Application too: a dependency risks a lockout it can't
   # sync itself out of.
-  endpointSelector: {}
+  # Never selects the controller. Its egress lives only in network-policy-application-controller.yaml,
+  # so no apply order leaves it with a partial allow list.
+  endpointSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: NotIn
+        values: [argocd-application-controller]
   egress:
     - toEndpoints:
         - matchLabels:
