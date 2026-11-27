@@ -69,6 +69,8 @@ The `Deployment` sets no `replicas`. The HPA owns that field, and ArgoCD reverts
 
 The HPA also scales down faster than the default. Kubernetes waits for several minutes of lower usage before it removes pods, and podinfo's `ScaledObject` shortens that wait, so a run shows the scale down without it. It's a demo setting: a real app usually keeps the default, so a short dip in traffic doesn't remove pods it needs a minute later.
 
+But podinfo never scales down blind. The `ScaledObject`'s query counts every request podinfo serves, probes and Prometheus scrapes included, so its series exists as long as Prometheus scrapes podinfo. An empty result then means a lost scrape, not an idle app. KEDA treats it as an error, and after a few errors in a row it holds the current replicas instead of reading `0` and removing pods. The fields that set this are in [Add the Autoscaler](/docs/applications/load-testing/load-test-an-application/#add-the-autoscaler).
+
 ## Network Policies
 podinfo's namespace denies all traffic by default, so k6's requests are dropped unless both ends allow them (see [Why Both Ends Need a Rule](/docs/security/how-network-policies-work/#why-both-ends-need-a-rule)). k6 has its own policy, [`manifests/podinfo/k6-loadtest-network-policy.yaml`](../manifests/podinfo/k6-loadtest-network-policy.yaml), which allows egress to podinfo. And [`manifests/podinfo/podinfo-network-policy.yaml`](../manifests/podinfo/podinfo-network-policy.yaml) allows ingress from k6.
 
