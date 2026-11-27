@@ -65,7 +65,10 @@ metadata:
     pod-security.kubernetes.io/enforce: baseline
     pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/audit: restricted
+    network-policy.eks-forge.io/kube-dns-egress: "true"
 ```
+
+Every namespace denies all traffic by default, so also label it with `network-policy.eks-forge.io/<policy>: "true"` for each baseline egress your pods need (DNS, the Kubernetes API, EKS Pod Identity), as podinfo does for DNS. For the policy names, see the Cluster-wide tab of [Write the Rule](/docs/security/write-network-policies/#write-the-rule).
 
 If your pods break a [`baseline` rule](https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline), enforce `privileged` instead. Add a comment naming what needs it, like [`manifests/namespaces/monitoring.yaml`](../manifests/namespaces/monitoring.yaml):
 ```yaml
