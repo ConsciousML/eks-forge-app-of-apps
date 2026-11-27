@@ -6,6 +6,8 @@ The [`network-policies-kube-system` chart](./) renders the `CiliumNetworkPolicy`
 
 For how `CiliumNetworkPolicy` enforcement works, and why these policies live here, see [How Network Policies Work](/docs/security/how-network-policies-work/#avoiding-a-lockout).
 
+After changing `karpenter`'s policy, restart a Karpenter pod to test it. Karpenter starts before this policy exists, and calls some APIs only at startup (e.g. EKS for the cluster CIDR), so a missing rule only shows on a restart.
+
 ## What's Inside
 
 - **[templates/](templates/)**: one `CiliumNetworkPolicy` per component. `ebs-csi-controller`'s EBS API egress and `karpenter`'s EC2 Fleet, SQS, IAM, SSM, and EKS egress are scoped via `toCIDR` to `vpcEndpointCidrs`, not `toEntities: world`

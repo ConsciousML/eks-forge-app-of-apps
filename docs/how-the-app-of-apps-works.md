@@ -119,11 +119,11 @@ When a pod can't fit on the existing nodes, [Karpenter](https://karpenter.sh/) l
 So every Application that runs pods is held to wave `3` or later, even without a real dependency on the DaemonSets. The `DaemonSets Priority` comment in [`apps/core/values.yaml`](../apps/core/values.yaml) marks the entries this rule applies to.
 
 ## Namespaces
-[`charts/app-of-apps/templates/_applications.tpl`](../charts/app-of-apps/templates/_applications.tpl) sets `CreateNamespace=false` on every child Application, so none of them can create its own namespace. Instead, the `namespaces` Application creates them all from [`manifests/namespaces`](../manifests/namespaces/), each with its [Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/) labels and the network policy labels its pods need.
+[`charts/app-of-apps/templates/_applications.tpl`](../charts/app-of-apps/templates/_applications.tpl) sets `CreateNamespace=false` on every child Application, so none of them can create its own namespace. Instead, the `namespaces` Application creates the core ones from [`manifests/namespaces`](../manifests/namespaces/), and each optional feature creates its own from `manifests/features/<feature>/namespaces`, like `gpu-namespaces` does. Each namespace gets its [Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/) labels and the network policy labels its pods need.
 
-This way, no application can end up in a namespace without Pod Security labels. An application whose namespace is missing from `manifests/namespaces` fails to sync instead.
+This way, no application can end up in a namespace without Pod Security labels. An application whose namespace is missing from these directories fails to sync instead.
 
-Network policy labels are optional. `argocd`, `kube-system`, `default`, and `kube-public` carry none on purpose. A namespace without one gets no [cluster-wide allow rule](/docs/security/how-network-policies-work/#two-kinds-of-policies), so `default-deny` drops all its traffic except what its own policies allow.
+Network policy labels are optional. `argocd` and `kube-system` carry none to avoid a [lockout](/docs/security/how-network-policies-work/#avoiding-a-lockout), and `default`, `kube-public`, `kube-node-lease`, `gateway`, and `gpu` carry none because their pods, if any, need no cluster-wide egress. A namespace without one gets no [cluster-wide allow rule](/docs/security/how-network-policies-work/#two-kinds-of-policies), so `default-deny` drops all its traffic except what its own policies allow.
 
 ## Deletion Safety
 Git decides what gets deleted. Remove a manifest or an Application from the app of apps repository, and ArgoCD removes what it deployed from the cluster. Nothing lingers after you drop an application.
