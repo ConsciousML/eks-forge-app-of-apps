@@ -23,7 +23,7 @@ Here's how EKS Forge applies this pattern in the app of apps repository.
 
 ```mermaid
 flowchart LR
-    unit["Catalog unit<br/>argocd_app_of_apps"] -->|creates| root["Root Application<br/>app-of-apps"]
+    unit["Catalog unit<br/>argocd_app_of_apps"] -->|creates| root["Root Application<br/>app-of-apps-core"]
     root -->|renders apps/core/| podinfo["Application<br/>podinfo"]
     root -->|renders apps/core/| lbc["Application<br/>aws-lbc"]
     root -->|renders apps/core/| more["..."]
@@ -34,6 +34,8 @@ flowchart LR
 Terraform creates the root Application, `app-of-apps-core`, with the rest of the cluster. It points at the [`apps/core/`](../apps/core/) root chart, which renders, through the [`app-of-apps`](../charts/app-of-apps/) library chart, one child Application per entry under `applications` in [`apps/core/values.yaml`](../apps/core/values.yaml). Each child then deploys the manifests or chart at its entry's `path`.
 
 From then on, ArgoCD deploys every application from the app of apps repository. Adding an application is one entry in `apps/core/values.yaml`, with no Terraform change unless the application needs AWS resources or a value from a Terraform module.
+
+The root chart holds only the list. The template that turns an entry into an Application lives in the `app-of-apps` [library chart](https://helm.sh/docs/topics/library_charts/), which can't be deployed on its own, so each root chart includes it. `apps/core/` lists the applications every cluster runs, and each optional feature has its own root chart under [`apps/features/`](../apps/features/), synced by its own root Application, such as `app-of-apps-gpu`. A change to how Applications are rendered then lands in every root chart at once.
 
 A child Application is an entry, not a directory. Several entries can share one chart with different values: every `*-httproute` entry deploys [`charts/gateway-api/httproute`](../charts/gateway-api/httproute/), each with its own values file.
 
@@ -89,7 +91,7 @@ The same app of apps repository deploys the applications of `dev`, `staging`, an
       - charts/monitoring/loki/values-{{ .Values.global.environment }}.yaml
 ```
 
-The catalog injects `global.environment` into the root Application, and `applications.yaml` renders each `extraValueFiles` entry with it. In `prod`, `loki` loads [`values-prod.yaml`](../charts/monitoring/loki/values-prod.yaml), which keeps its storage volumes when Loki is deleted or scaled down. `values-dev.yaml` and `values-staging.yaml` delete them instead, to save costs.
+The catalog injects `global.environment` into the root Application, and the library chart's [`_applications.tpl`](../charts/app-of-apps/templates/_applications.tpl) renders each `extraValueFiles` entry with it. In `prod`, `loki` loads [`values-prod.yaml`](../charts/monitoring/loki/values-prod.yaml), which keeps its storage volumes when Loki is deleted or scaled down. `values-dev.yaml` and `values-staging.yaml` delete them instead, to save costs.
 
 An overlay holds only the keys that differ, so the shared config lives once in `values.yaml` instead of being copied per environment. And since [`apps/core/values.schema.json`](../apps/core/values.schema.json) requires a non-empty `global.environment`, a missing environment fails loudly instead of silently loading a nonexistent `values-.yaml`.
 
@@ -107,9 +109,13 @@ flowchart LR
 
 Each entry in `apps/core/values.yaml` has a `syncWave` number that encodes this order.
 
-The root Application syncs its children one [sync wave](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/) at a time, lowest number first. It only starts the next wave once every Application in the current one is healthy.
+The root Application syncs its children one [sync wave](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/) at a time, lowest number first. It only starts the next wave once every Application in the current one is `Synced` and `Healthy`.
 
-For example, if `namespaces` is at wave `0` and `podinfo` at wave `1`, ArgoCD syncs `namespaces`, waits for it to be healthy, then syncs `podinfo`.
+For example, if `namespaces` is at wave `0` and `podinfo` at wave `1`, ArgoCD syncs `namespaces`, waits for it to be `Synced` and `Healthy`, then syncs `podinfo`.
+
+`Healthy` alone isn't enough. A child Application whose manifests the repo server hasn't rendered yet has no resources, so ArgoCD reports it `Healthy`. On health alone, the next wave could start too early: `aws-lbc` ran before `crds-gateway-api` had created the Gateway API CRDs it needs. So each environment's stack file configures ArgoCD with a [health check](https://argo-cd.readthedocs.io/en/stable/operator-manual/health/#argocd-app) on Applications that reports a child still `OutOfSync` as `Progressing`.
+
+The trade-off is that a child stuck `OutOfSync` blocks every later wave, even once its resources are up.
 
 ### DaemonSets Priority
 Some dependencies don't show up in any manifest. Several Applications ship a [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/), one pod per node, such as Alloy, Loki's canary, and kube-prometheus-stack's node exporter.
@@ -117,6 +123,22 @@ Some dependencies don't show up in any manifest. Several Applications ship a [Da
 When a pod can't fit on the existing nodes, [Karpenter](https://karpenter.sh/) launches a new one, sized for that pod plus the DaemonSets it already knows about. If an application syncs before a DaemonSet exists, Karpenter can launch a node with no room left for it. The DaemonSet's pod then stays `Pending`, until its priority class evicts another pod to make room.
 
 So every Application that runs pods is held to wave `3` or later, even without a real dependency on the DaemonSets. The `DaemonSets Priority` comment in [`apps/core/values.yaml`](../apps/core/values.yaml) marks the entries this rule applies to.
+
+## Waiting for the Root Apps
+Terraform creates each root Application through a Helm release, and Helm considers the release installed as soon as the Application exists. ArgoCD deploys its children afterwards. Without a wait, the apply would succeed on a cluster still deploying, or with an application that never starts.
+
+So the [`argocd_app_of_apps` module](/docs/reference/terraform_modules/argocd_app_of_apps/) installs a second release, `<root app>-wait`, whose hook Job blocks the apply until the root Application and every child are `Synced` and `Healthy`. When one isn't within `wait_timeout`, 30 minutes by default, the apply fails. The failed Job stays in the cluster, and its log names the Application and its status:
+```bash
+kubectl logs job/app-of-apps-core-wait -n argocd
+```
+
+The Job asks ArgoCD to refresh each Application before reading it. ArgoCD caches an Application's status from its last reconcile, every 3 minutes or so, so right after an upgrade the status is still the one of the previous revision. Without the refresh, the wait would pass on it.
+
+The root Application retries a failed sync 20 times, with a backoff capped at 2 minutes, so its retries span longer than `wait_timeout`. A slow wave, like a component's first rollout, can fail a sync attempt before it turns `Healthy`. If the retries ran out first, the root would stop syncing while the Job still waits, and the apply would fail on a deployment that only needed time.
+
+The Job runs again only when the root Application's values change, such as its git revision or an `appParams` value. A change made only in the app of apps repository, like a new commit on the branch `dev` follows, isn't waited on: ArgoCD deploys it after the apply.
+
+The Job runs on the [critical NodePool](/docs/compute/how-pods-are-scheduled/#critical-nodepool), next to the ArgoCD controller. It has no retry, so a node consolidated under it would fail the apply, and the critical NodePool rarely disrupts its nodes.
 
 ## Namespaces
 [`charts/app-of-apps/templates/_applications.tpl`](../charts/app-of-apps/templates/_applications.tpl) sets `CreateNamespace=false` on every child Application, so none of them can create its own namespace. Instead, the `namespaces` Application creates them all from [`manifests/namespaces`](../manifests/namespaces/), each with its [Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/) labels and the network policy labels its pods need.

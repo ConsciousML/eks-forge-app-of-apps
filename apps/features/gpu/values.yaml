@@ -25,7 +25,7 @@ global:
   # @section -- Catalog Inputs
   environment: ""
 
-# -- One child `Application` per entry. See [Values Schema](#values-schema).
+# -- One child `Application` per entry. See the library's [Values Schema](../../../charts/app-of-apps/#values-schema).
 # @section -- Applications
 # @default -- see values.yaml
 applications:
