@@ -65,7 +65,10 @@ metadata:
     pod-security.kubernetes.io/enforce: baseline
     pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/audit: restricted
+    network-policy.eks-forge.io/kube-dns-egress: "true"
 ```
+
+Also add one `network-policy.eks-forge.io/<policy>: "true"` label per baseline egress your pods need: `kube-dns-egress` to resolve DNS, `kube-apiserver-egress` to call the Kubernetes API, and `eks-pod-identity-egress` to use an EKS Pod Identity association. The cluster-wide policies select namespaces by these labels, so you don't edit them. podinfo only resolves DNS, so it only carries `kube-dns-egress`. A namespace without the label is denied that egress by [`default-deny.yaml`](../manifests/network-policies/cluster-wide/default-deny.yaml), which selects every namespace. See [Write Network Policies](/docs/security/write-network-policies/) for the rest of the rules.
 
 If your pods break a [`baseline` rule](https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline), enforce `privileged` instead. Add a comment naming what needs it, like [`manifests/namespaces/monitoring.yaml`](../manifests/namespaces/monitoring.yaml):
 ```yaml
@@ -79,6 +82,8 @@ metadata:
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/warn: privileged
     pod-security.kubernetes.io/audit: privileged
+    network-policy.eks-forge.io/kube-apiserver-egress: "true"
+    network-policy.eks-forge.io/kube-dns-egress: "true"
 ```
 
 ### Write the App

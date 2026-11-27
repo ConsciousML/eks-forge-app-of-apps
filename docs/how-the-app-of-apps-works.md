@@ -119,7 +119,7 @@ When a pod can't fit on the existing nodes, [Karpenter](https://karpenter.sh/) l
 So every Application that runs pods is held to wave `3` or later, even without a real dependency on the DaemonSets. The `DaemonSets Priority` comment in [`apps/core/values.yaml`](../apps/core/values.yaml) marks the entries this rule applies to.
 
 ## Namespaces
-[`charts/app-of-apps/templates/_applications.tpl`](../charts/app-of-apps/templates/_applications.tpl) sets `CreateNamespace=false` on every child Application, so none of them can create its own namespace. Instead, the `namespaces` Application creates them all from [`manifests/namespaces`](../manifests/namespaces/), each with its [Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/) labels.
+[`charts/app-of-apps/templates/_applications.tpl`](../charts/app-of-apps/templates/_applications.tpl) sets `CreateNamespace=false` on every child Application, so none of them can create its own namespace. Instead, the `namespaces` Application creates them all from [`manifests/namespaces`](../manifests/namespaces/), each with its [Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/) labels and the `network-policy.eks-forge.io/<policy>: "true"` labels that opt it into the [cluster-wide network policies](/docs/reference/manifests/network-policies/cluster-wide/) it needs.
 
 This way, no application can end up in a namespace without those labels. An application whose namespace is missing from `manifests/namespaces` fails to sync instead.
 
