@@ -84,7 +84,7 @@ Pick the tab that matches the **Rules on** column:
 <Tabs groupId="policy-scope">
 <TabItem value="namespaces" label="Cluster-wide">
 
-Add the label of the file in [`manifests/network-policies/cluster-wide/`](../manifests/network-policies/cluster-wide/) that allows the flow to your namespace in [`manifests/namespaces/`](../manifests/namespaces/). Each file selects the namespaces carrying `network-policy.eks-forge.io/<file name>: "true"`. For example, if your app resolves DNS names, like podinfo, add the label of [`kube-dns-egress.yaml`](../manifests/network-policies/cluster-wide/kube-dns-egress.yaml) to [`manifests/namespaces/podinfo.yaml`](../manifests/namespaces/podinfo.yaml):
+Add the label of the file in [`manifests/network-policies/cluster-wide/`](../manifests/network-policies/cluster-wide/) that allows the flow to your namespace in [`manifests/namespaces/`](../manifests/namespaces/), or in `manifests/features/<feature>/namespaces/` for an optional feature's namespace. Each file selects the namespaces carrying `network-policy.eks-forge.io/<file name>: "true"`. For example, if your app resolves DNS names, like podinfo, add the label of [`kube-dns-egress.yaml`](../manifests/network-policies/cluster-wide/kube-dns-egress.yaml) to [`manifests/namespaces/podinfo.yaml`](../manifests/namespaces/podinfo.yaml):
 ```yaml
 metadata:
   name: podinfo

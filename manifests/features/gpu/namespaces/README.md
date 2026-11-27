@@ -2,7 +2,7 @@
 
 # `gpu` Namespaces Manifests Reference
 
-The [`gpu` namespaces manifests](./) define the namespaces of the `gpu` optional feature, with the same labels as core's [`namespaces`](../../../namespaces/).
+The [`gpu` namespaces manifests](./) define the namespaces of the `gpu` optional feature, with Pod Security Admission labels like core's [`namespaces`](../../../namespaces/). They carry no network policy label, since the feature's pods need no cluster-wide egress.
 
 ## What's Inside
 

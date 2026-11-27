@@ -2,7 +2,7 @@
 
 # `network-policies-cluster-wide` Manifests Reference
 
-The [`network-policies-cluster-wide` manifests](./) define `CiliumClusterwideNetworkPolicy` rules, one file per concern. `default-deny.yaml` selects every pod in every namespace. Each other file selects the namespaces carrying its label, `network-policy.eks-forge.io/<file name>: "true"`, set in [`manifests/namespaces/`](../../namespaces/):
+The [`network-policies-cluster-wide` manifests](./) define `CiliumClusterwideNetworkPolicy` rules, one file per concern. `default-deny.yaml` selects every pod in every namespace. Each other file selects the namespaces carrying its label, `network-policy.eks-forge.io/<file name>: "true"`, set in [`manifests/namespaces/`](../../namespaces/), or in an optional feature's `manifests/features/<feature>/namespaces/`:
 
 ```yaml
 endpointSelector:
