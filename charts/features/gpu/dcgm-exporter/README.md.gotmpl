@@ -8,7 +8,7 @@ The [`dcgm-exporter` chart](./) deploys the [DCGM exporter](https://github.com/N
 
 - **[templates/network-policy.yaml](templates/network-policy.yaml)**: the exporter's `CiliumNetworkPolicy`
 - **[templates/dashboard.yaml](templates/dashboard.yaml)**: a `ConfigMap` holding the **NVIDIA DCGM Exporter Dashboard**, loaded into Grafana's **GPU** folder by its dashboard sidecar
-- **[dashboards/dcgm-exporter.json](dashboards/dcgm-exporter.json)**: the dashboard, copied unchanged from the upstream [`grafana/dcgm-exporter-dashboard.json`](https://github.com/NVIDIA/dcgm-exporter/blob/4.9.0/grafana/dcgm-exporter-dashboard.json) at the tag matching the chart version, since metric names change between exporter versions, so the file is copied again from the new tag on each chart bump, or its panels go empty without an error
+- **[dashboards/dcgm-exporter.json](dashboards/dcgm-exporter.json)**: the dashboard, copied unchanged from the upstream [`grafana/dcgm-exporter-dashboard.json`](https://github.com/NVIDIA/dcgm-exporter/blob/4.9.0/grafana/dcgm-exporter-dashboard.json) at the tag matching the chart version, since metric names change between exporter versions. A dashboard copied from another tag shows empty panels without an error
 - **[values.yaml](values.yaml)**: see [Values](#values)
 
 {{ template "chart.valuesSection" . }}
