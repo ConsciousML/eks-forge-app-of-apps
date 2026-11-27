@@ -102,7 +102,7 @@ Add an entry under `applications` in [`apps/core/values.yaml`](../apps/core/valu
     path: manifests/podinfo
     destination:
       namespace: podinfo
-    syncWave: 4
+    syncWave: 8
 ```
 
 For the other fields, such as `tool.helm.releaseName` or `syncOptions`, see the [`app-of-apps` Helm Chart](/docs/reference/helm_charts/app-of-apps/) reference.

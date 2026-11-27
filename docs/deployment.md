@@ -30,7 +30,7 @@ Click on it. The tree shows every other Application downstream of `app-of-apps-c
     path: manifests/podinfo
     destination:
       namespace: podinfo
-    syncWave: 4
+    syncWave: 8
 ```
 Its `path` points at the directory ArgoCD deploys this Application from.
 
