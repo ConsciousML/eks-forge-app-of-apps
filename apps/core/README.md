@@ -34,7 +34,7 @@ For setup steps, read [How to Add, Edit, or Remove an App](/docs/applications/ad
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| applications | list | see values.yaml | One child `Application` per entry. See [Values Schema](#values-schema). |
+| applications | list | see values.yaml | One child `Application` per entry. See the library's [Values Schema](../../charts/app-of-apps/#values-schema). |
 
 ## Upstream Dependencies
 

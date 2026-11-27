@@ -36,7 +36,7 @@ The [`gpu` root chart](./) lists the applications of the `gpu` optional feature.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| applications | list | see values.yaml | One child `Application` per entry. See [Values Schema](#values-schema). |
+| applications | list | see values.yaml | One child `Application` per entry. See the library's [Values Schema](../../../charts/app-of-apps/#values-schema). |
 
 ## Upstream Dependencies
 
